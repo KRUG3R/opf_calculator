@@ -1,0 +1,1277 @@
+{
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "abrir_navegador": true
+  },
+  "pricing_api": {
+    "habilitada": true,
+    "base_url": "https://pricing.us-east-1.amazonaws.com",
+    "offer_code": "AWSELB",
+    "timeout_segundos": 20,
+    "cache_horas": 24,
+    "cache_dir": ".cache"
+  },
+  "cambio": {
+    "usd_brl": 5.503,
+    "buscar_automatico": false,
+    "url": "https://economia.awesomeapi.com.br/json/last/USD-BRL",
+    "cache_horas": 6,
+    "timeout_segundos": 10,
+    "cache_dir": ".cache",
+    "fonte_fallback": "config.json (snapshot AwesomeAPI 2026-11-06)"
+  },
+  "regioes_disponiveis": [
+    "sa-east-1",
+    "us-east-1",
+    "us-east-2",
+    "us-west-2",
+    "eu-west-1",
+    "eu-central-1",
+    "ap-southeast-1",
+    "ap-northeast-1"
+  ],
+  "premissas": {
+    "slot_variavel": true
+  },
+  "recursos": {
+    "api-gateway": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_volumetria_do_alb": true,
+        "region": "sa-east-1",
+        "tpm_por_if": 2500,
+        "numero_ifs": 1,
+        "fator_pico": 1.0,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "tipo_api": "http",
+        "integracao": "vpc_link_alb",
+        "numero_rotas": 1,
+        "requests_por_transacao": 1.0,
+        "cache_gb": "nenhum",
+        "limite_rps_conta": 10000
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonApiGateway) - snapshot 2026-10-13",
+        "sa-east-1": {
+          "http_requests": [
+            {
+              "inicio": 0,
+              "fim": 300000000,
+              "preco": 1.59e-06
+            },
+            {
+              "inicio": 300000000,
+              "fim": null,
+              "preco": 1.43e-06
+            }
+          ],
+          "rest_requests": [
+            {
+              "inicio": 0,
+              "fim": 1000000000,
+              "preco": 4.25e-06
+            },
+            {
+              "inicio": 1000000000,
+              "fim": 20000000000,
+              "preco": 3.61e-06
+            },
+            {
+              "inicio": 20000000000,
+              "fim": null,
+              "preco": 2.29e-06
+            }
+          ],
+          "cache_hora": {
+            "0.5": 0.028,
+            "1.55": 0.054,
+            "6.05": 0.245,
+            "13.5": 0.29,
+            "28.4": 0.56,
+            "58.2": 1.1,
+            "118": 2.2,
+            "237": 4.4
+          }
+        },
+        "us-east-1": {
+          "http_requests": [
+            {
+              "inicio": 0,
+              "fim": 300000000,
+              "preco": 1e-06
+            },
+            {
+              "inicio": 300000000,
+              "fim": null,
+              "preco": 9e-07
+            }
+          ],
+          "rest_requests": [
+            {
+              "inicio": 0,
+              "fim": 333000000,
+              "preco": 3.5e-06
+            },
+            {
+              "inicio": 333000000,
+              "fim": 667000000,
+              "preco": 3.28e-06
+            },
+            {
+              "inicio": 667000000,
+              "fim": 19000000000,
+              "preco": 2.85e-06
+            },
+            {
+              "inicio": 19000000000,
+              "fim": null,
+              "preco": 1.51e-06
+            }
+          ],
+          "cache_hora": {
+            "0.5": 0.02,
+            "1.55": 0.038,
+            "6.05": 0.2
+          }
+        }
+      }
+    },
+    "alb": {
+      "habilitado": true,
+      "entradas": {
+        "region": "sa-east-1",
+        "tpm_por_if": 100.0,
+        "numero_ifs": 60.0,
+        "registros_por_pagina": 1000.0,
+        "response_time_s": 1.5,
+        "modo_payload_entrada": "manual",
+        "payload_entrada_kb": 2.0,
+        "exemplo_payload_entrada": "",
+        "modo_payload_saida": "por_exemplo_json",
+        "payload_saida_kb": 500.0,
+        "payload_saida_por_registro_kb": 1.0,
+        "exemplo_payload_saida_envelope": "{\n  \"resourceIds\": [],\n  \"links\": {\n    \"self\": \"https://api.banco.com.br/open-banking/aggregated-polling/v1/balances\",\n    \"first\": \"https://api.banco.com.br/open-banking/aggregated-polling/v1/balances\",\n    \"next\": \"https://api.banco.com.br/open-banking/aggregated-polling/v1/balances?page=2\"\n  },\n  \"meta\": {\n    \"requestDateTime\": \"2024-02-28T15:23:35Z\",\n    \"slotStartDateTime\": \"2024-02-28T14:15:00Z\",\n    \"slotEndDateTime\": \"2024-02-28T15:14:59Z\"\n  }\n}",
+        "exemplo_payload_saida_registro": "\"a37ea1e8-b42d-46ea-97b8-d4dde26dde81\"",
+        "minificar_json": true,
+        "reuso_conexao": 1.0,
+        "regras_por_request": 1.0,
+        "overhead_http_kb": 0.8,
+        "horas_por_dia": 24.0,
+        "dias_por_mes": 30.0,
+        "fator_pico": 1.0,
+        "zonas_disponibilidade": 3.0
+      },
+      "lcu_limites": {
+        "novas_conexoes_por_segundo": 25,
+        "conexoes_ativas_por_minuto": 3000,
+        "bytes_processados_gb_por_hora": 1.0,
+        "avaliacoes_regra_por_segundo": 1000,
+        "regras_gratuitas": 10
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AWSELB / sa-east-1) - snapshot 2026-11-05",
+        "sa-east-1": {
+          "alb_hora": 0.034,
+          "lcu_hora": 0.011
+        },
+        "us-east-1": {
+          "alb_hora": 0.0225,
+          "lcu_hora": 0.008
+        }
+      }
+    },
+    "ecs-consulta": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_volumetria_do_alb": true,
+        "region": "sa-east-1",
+        "tpm_por_if": 2500,
+        "numero_ifs": 1,
+        "fator_pico": 1.0,
+        "response_time_s": 1.5,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "arquitetura": "x86",
+        "vcpu_por_task": 0.5,
+        "memoria_gb_por_task": 1.0,
+        "armazenamento_efemero_gb": 20,
+        "tempo_cpu_por_request_ms": 25,
+        "utilizacao_alvo_cpu": 60,
+        "concorrencia_por_task": 50,
+        "tasks_minimas": 2,
+        "tasks_maximas": 500,
+        "horas_pico_por_dia": 24,
+        "percentual_tpm_fora_pico": 30
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonECS) - snapshot 2026-10-19",
+        "sa-east-1": {
+          "vcpu_hora_x86": 0.0696,
+          "gb_hora_x86": 0.0076,
+          "vcpu_hora_arm": 0.0557,
+          "gb_hora_arm": 0.00612,
+          "storage_efemero_gb_hora": 0.000211
+        },
+        "us-east-1": {
+          "vcpu_hora_x86": 0.04048,
+          "gb_hora_x86": 0.004445,
+          "vcpu_hora_arm": 0.03238,
+          "gb_hora_arm": 0.00356,
+          "storage_efemero_gb_hora": 0.000111
+        }
+      }
+    },
+    "ecs-carga": {
+      "habilitado": true,
+      "entradas": {
+        "modo_volumetria": "eventos_por_minuto",
+        "eventos_por_minuto": 50000.0,
+        "numero_clientes": 70000000.0,
+        "alteracoes_por_cliente_por_dia": 5.0,
+        "percentual_eventos_com_consentimento": 32.0,
+        "fator_pico": 1.0,
+        "herdar_regiao_do_alb": true,
+        "region": "sa-east-1",
+        "horas_por_dia": 24.0,
+        "dias_por_mes": 30.0,
+        "tempo_cpu_por_evento_ms": 6.0,
+        "tempo_cpu_adicional_ms": 8.0,
+        "latencia_consentimento_ms": 50.0,
+        "latencia_resource_ms": 20.0,
+        "latencia_escrita_ms": 10.0,
+        "concorrencia_por_task": 100.0,
+        "utilizacao_alvo_cpu": 60.0,
+        "particoes_topico": 256.0,
+        "consumidores_por_task": 2.0,
+        "arquitetura": "x86",
+        "vcpu_por_task": 2.0,
+        "memoria_gb_por_task": 4.0,
+        "armazenamento_efemero_gb": 20.0,
+        "tasks_minimas": 2.0,
+        "tasks_maximas": 500.0,
+        "horas_pico_por_dia": 24.0,
+        "percentual_eventos_fora_pico": 40.0
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonECS) - snapshot 2026-10-19",
+        "sa-east-1": {
+          "vcpu_hora_x86": 0.0696,
+          "gb_hora_x86": 0.0076,
+          "vcpu_hora_arm": 0.0557,
+          "gb_hora_arm": 0.00612,
+          "storage_efemero_gb_hora": 0.000211
+        },
+        "us-east-1": {
+          "vcpu_hora_x86": 0.04048,
+          "gb_hora_x86": 0.004445,
+          "vcpu_hora_arm": 0.03238,
+          "gb_hora_arm": 0.00356,
+          "storage_efemero_gb_hora": 0.000111
+        }
+      }
+    },
+    "dynamodb-saldo": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_volumetria_do_alb": true,
+        "region": "sa-east-1",
+        "tpm_por_if": 2500.0,
+        "numero_ifs": 1.0,
+        "fator_pico": 1.0,
+        "horas_por_dia": 24.0,
+        "dias_por_mes": 30.0,
+        "numero_registros": 23000000.0,
+        "exemplo_item": "{\n  \"resourceIds\": \"a37ea1e8-b42d-46ea-97b8-d4dde26dde81\",\n  \"id_consentment\": \"b82f6d14-7a39-4f12-9c58-1e63a4d9b720\",\n  \"if_id\": \"c93a71e5-2b64-4d8f-a107-5f92e6c3d841\",\n  \"account_id\": \"d95a7ad6-2b64-4d8f-a107-5f92e6c3d841\",\n  \"id_eq3\": \"d14e8b62-5c97-4a31-bf20-8e73d9a6c154\",\n  \"last_balance_change\": \"2024-02-28T15:23:35Z\"\n}",
+        "overhead_item_bytes": 100.0,
+        "tamanho_chaves_bytes": 110.0,
+        "lsi_eq3_projecao": "keys_only",
+        "gsi_account_projecao": "keys_only",
+        "gsi_if_projecao": "all",
+        "gsi_if_sort_key_muda": true,
+        "herdar_carga_dos_ecs": true,
+        "consistencia_leitura": "forte",
+        "herdar_itens_da_pagina": true,
+        "itens_por_consulta": 500.0,
+        "consultas_tabela_por_transacao": 0.0,
+        "itens_por_consulta_tabela": 1.0,
+        "consultas_lsi_por_transacao": 0.0,
+        "eventos_com_consentimento_s": 1215.0,
+        "consultas_gsi_account_por_evento": 1.0,
+        "itens_por_consulta_gsi_account": 1.0,
+        "escritas_por_evento": 1.0,
+        "consultas_gsi_if_por_transacao": 1.0,
+        "atualizacoes_por_registro_por_dia": 1.0,
+        "novos_registros_por_dia": 23000.0,
+        "modo_capacidade": "on_demand",
+        "classe_tabela": "standard",
+        "utilizacao_alvo_provisionado": 70.0,
+        "pitr_habilitado": false,
+        "streams_habilitado": false,
+        "aplicar_free_tier": false
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonDynamoDB) - snapshot 2026-11-05",
+        "sa-east-1": {
+          "ia_rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.000244,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.0002440 per hour for units of IA read capacity in South America (Sao Paulo)"
+            }
+          ],
+          "ia_rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 2.345e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.2345 per million IA read request units in South America (Sao Paulo)"
+            }
+          ],
+          "ia_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.15,
+              "unidade": "GB-Mo",
+              "descricao": "$0.15000 per GB-Month of IA storage in South America (Sao Paulo)"
+            }
+          ],
+          "ia_wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.001219,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.0012190 per hour for units of IA write capacity in South America (Sao Paulo)"
+            }
+          ],
+          "ia_wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.172e-06,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$1.172 per million IA write request units in South America (Sao Paulo)"
+            }
+          ],
+          "pitr_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.3,
+              "unidade": "GB-Mo",
+              "descricao": "$0.30 per GB-Month of storage used for DynamoDB PITR backup"
+            }
+          ],
+          "rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of read capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.000195,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.000195 per hour for units of read capacity beyond the free tier"
+            }
+          ],
+          "rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.875e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.1875 per million read request units (South America (Sao Paulo))"
+            }
+          ],
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 25.0,
+              "preco": 0.0,
+              "unidade": "GB-Mo",
+              "descricao": "$0.00 per GB-Month of storage for first 25 free GB-Months"
+            },
+            {
+              "inicio": 25.0,
+              "fim": null,
+              "preco": 0.375,
+              "unidade": "GB-Mo",
+              "descricao": "$0.375 per GB-Month of storage used beyond first 25 free GB-Months"
+            }
+          ],
+          "streams_requests": [
+            {
+              "inicio": 0.0,
+              "fim": 2500000.0,
+              "preco": 0.0,
+              "unidade": "Requests",
+              "descricao": "$0.00 for 2.5 million DynamoDB Streams read request units for a month (free tier) (South America (Sao Paulo))"
+            },
+            {
+              "inicio": 2500000.0,
+              "fim": null,
+              "preco": 3e-07,
+              "unidade": "Requests",
+              "descricao": "$0.0000003 per DynamoDB Streams read request unit beyond free tier (South America (Sao Paulo))"
+            }
+          ],
+          "wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of write capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.000975,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.000975 per hour for units of write capacity beyond the free tier"
+            }
+          ],
+          "wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 9.375e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.9375 per million write request units (South America (Sao Paulo))"
+            }
+          ]
+        },
+        "us-east-1": {
+          "ia_rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.00016,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.0001600 per hour for units of IA read capacity in US East (N. Virginia)"
+            }
+          ],
+          "ia_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.1,
+              "unidade": "GB-Mo",
+              "descricao": "$0.10000 per GB-Month of IA storage in US East (N. Virginia)"
+            }
+          ],
+          "ia_wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.00081,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.0008100 per hour for units of IA write capacity in US East (N. Virginia)"
+            }
+          ],
+          "ia_wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 7.8e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.78 per million IA write request units in US East (N. Virginia)"
+            }
+          ],
+          "pitr_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.2,
+              "unidade": "GB-Mo",
+              "descricao": "$0.20 per GB-Month of storage used for DynamoDB PITR backup"
+            }
+          ],
+          "rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of read capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.00013,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00013 per hour for units of read capacity beyond the free tier"
+            }
+          ],
+          "rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.55e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.155 per million IA read request units in US East (N. Virginia)"
+            }
+          ],
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 25.0,
+              "preco": 0.0,
+              "unidade": "GB-Mo",
+              "descricao": "$0.00 per GB-Month of storage for first 25 free GB-Months"
+            },
+            {
+              "inicio": 25.0,
+              "fim": null,
+              "preco": 0.25,
+              "unidade": "GB-Mo",
+              "descricao": "$0.25 per GB-Month of storage used beyond first 25 free GB-Months"
+            }
+          ],
+          "streams_requests": [
+            {
+              "inicio": 0.0,
+              "fim": 2500000.0,
+              "preco": 0.0,
+              "unidade": "Requests",
+              "descricao": "$0.00 for 2.5 million DynamoDB Streams read request units for a month (free tier) (US East (N. Virginia))"
+            },
+            {
+              "inicio": 2500000.0,
+              "fim": null,
+              "preco": 2e-07,
+              "unidade": "Requests",
+              "descricao": "$0.0000002 per DynamoDB Streams read request unit beyond free tier (US East (N. Virginia))"
+            }
+          ],
+          "wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of write capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.00065,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00065 per hour for units of write capacity beyond the free tier"
+            }
+          ],
+          "wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 6.25e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.625 per million write request units (N. Virginia)"
+            }
+          ]
+        }
+      }
+    },
+    "dynamodb-paginacao": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_volumetria_do_alb": true,
+        "region": "sa-east-1",
+        "tpm_por_if": 2500,
+        "numero_ifs": 1,
+        "fator_pico": 1.0,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "paginas_por_sessao": 5,
+        "atualiza_cursor_por_pagina": true,
+        "ttl_minutos": 15,
+        "consistencia_leitura": "forte",
+        "exemplo_item": "{\n  \"pagination_token\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"if_id\": \"c93a71e5-2b64-4d8f-a107-5f92e6c3d841\",\n  \"id_consentment\": \"b82f6d14-7a39-4f12-9c58-1e63a4d9b720\",\n  \"last_evaluated_key\": \"d95a7ad6-2b64-4d8f-a107-5f92e6c3d841\",\n  \"page_number\": 2,\n  \"page_size\": 500,\n  \"slot_start\": \"2024-02-28T14:15:00Z\",\n  \"slot_end\": \"2024-02-28T15:14:59Z\",\n  \"created_at\": \"2024-02-28T15:23:35Z\",\n  \"expires_at\": 1709134415\n}",
+        "overhead_item_bytes": 100,
+        "guardar_pagina_no_item": false,
+        "bytes_por_id": 38,
+        "herdar_itens_da_pagina": true,
+        "ids_por_token": 500,
+        "modo_capacidade": "on_demand",
+        "classe_tabela": "standard",
+        "utilizacao_alvo_provisionado": 70,
+        "pitr_habilitado": false,
+        "aplicar_free_tier": false
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonDynamoDB) - snapshot 2026-11-05",
+        "sa-east-1": {
+          "ia_rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.000244,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.0002440 per hour for units of IA read capacity in South America (Sao Paulo)"
+            }
+          ],
+          "ia_rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 2.345e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.2345 per million IA read request units in South America (Sao Paulo)"
+            }
+          ],
+          "ia_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.15,
+              "unidade": "GB-Mo",
+              "descricao": "$0.15000 per GB-Month of IA storage in South America (Sao Paulo)"
+            }
+          ],
+          "ia_wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.001219,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.0012190 per hour for units of IA write capacity in South America (Sao Paulo)"
+            }
+          ],
+          "ia_wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.172e-06,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$1.172 per million IA write request units in South America (Sao Paulo)"
+            }
+          ],
+          "pitr_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.3,
+              "unidade": "GB-Mo",
+              "descricao": "$0.30 per GB-Month of storage used for DynamoDB PITR backup"
+            }
+          ],
+          "rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of read capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.000195,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.000195 per hour for units of read capacity beyond the free tier"
+            }
+          ],
+          "rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.875e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.1875 per million read request units (South America (Sao Paulo))"
+            }
+          ],
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 25.0,
+              "preco": 0.0,
+              "unidade": "GB-Mo",
+              "descricao": "$0.00 per GB-Month of storage for first 25 free GB-Months"
+            },
+            {
+              "inicio": 25.0,
+              "fim": null,
+              "preco": 0.375,
+              "unidade": "GB-Mo",
+              "descricao": "$0.375 per GB-Month of storage used beyond first 25 free GB-Months"
+            }
+          ],
+          "streams_requests": [
+            {
+              "inicio": 0.0,
+              "fim": 2500000.0,
+              "preco": 0.0,
+              "unidade": "Requests",
+              "descricao": "$0.00 for 2.5 million DynamoDB Streams read request units for a month (free tier) (South America (Sao Paulo))"
+            },
+            {
+              "inicio": 2500000.0,
+              "fim": null,
+              "preco": 3e-07,
+              "unidade": "Requests",
+              "descricao": "$0.0000003 per DynamoDB Streams read request unit beyond free tier (South America (Sao Paulo))"
+            }
+          ],
+          "wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of write capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.000975,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.000975 per hour for units of write capacity beyond the free tier"
+            }
+          ],
+          "wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 9.375e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.9375 per million write request units (South America (Sao Paulo))"
+            }
+          ]
+        },
+        "us-east-1": {
+          "ia_rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.00016,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.0001600 per hour for units of IA read capacity in US East (N. Virginia)"
+            }
+          ],
+          "ia_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.1,
+              "unidade": "GB-Mo",
+              "descricao": "$0.10000 per GB-Month of IA storage in US East (N. Virginia)"
+            }
+          ],
+          "ia_wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.00081,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.0008100 per hour for units of IA write capacity in US East (N. Virginia)"
+            }
+          ],
+          "ia_wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 7.8e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.78 per million IA write request units in US East (N. Virginia)"
+            }
+          ],
+          "pitr_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.2,
+              "unidade": "GB-Mo",
+              "descricao": "$0.20 per GB-Month of storage used for DynamoDB PITR backup"
+            }
+          ],
+          "rcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of read capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.00013,
+              "unidade": "ReadCapacityUnit-Hrs",
+              "descricao": "$0.00013 per hour for units of read capacity beyond the free tier"
+            }
+          ],
+          "rru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.55e-07,
+              "unidade": "ReadRequestUnits",
+              "descricao": "$0.155 per million IA read request units in US East (N. Virginia)"
+            }
+          ],
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 25.0,
+              "preco": 0.0,
+              "unidade": "GB-Mo",
+              "descricao": "$0.00 per GB-Month of storage for first 25 free GB-Months"
+            },
+            {
+              "inicio": 25.0,
+              "fim": null,
+              "preco": 0.25,
+              "unidade": "GB-Mo",
+              "descricao": "$0.25 per GB-Month of storage used beyond first 25 free GB-Months"
+            }
+          ],
+          "streams_requests": [
+            {
+              "inicio": 0.0,
+              "fim": 2500000.0,
+              "preco": 0.0,
+              "unidade": "Requests",
+              "descricao": "$0.00 for 2.5 million DynamoDB Streams read request units for a month (free tier) (US East (N. Virginia))"
+            },
+            {
+              "inicio": 2500000.0,
+              "fim": null,
+              "preco": 2e-07,
+              "unidade": "Requests",
+              "descricao": "$0.0000002 per DynamoDB Streams read request unit beyond free tier (US East (N. Virginia))"
+            }
+          ],
+          "wcu_hora": [
+            {
+              "inicio": 0.0,
+              "fim": 18600.0,
+              "preco": 0.0,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00 per hour for 25 units of write capacity for a month (free tier)"
+            },
+            {
+              "inicio": 18600.0,
+              "fim": null,
+              "preco": 0.00065,
+              "unidade": "WriteCapacityUnit-Hrs",
+              "descricao": "$0.00065 per hour for units of write capacity beyond the free tier"
+            }
+          ],
+          "wru": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 6.25e-07,
+              "unidade": "WriteRequestUnits",
+              "descricao": "$0.625 per million write request units (N. Virginia)"
+            }
+          ]
+        }
+      }
+    },
+    "cloudwatch": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_regiao_do_alb": true,
+        "region": "sa-east-1",
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "numero_servicos": 2,
+        "politicas_escala_por_servico": 1,
+        "alarmes_por_politica": 2,
+        "metricas_padrao_observadas": 6,
+        "metricas_customizadas": 2,
+        "modo_coleta_externa": "getmetricdata",
+        "metricas_coletadas": 40,
+        "intervalo_coleta_minutos": 10,
+        "metricas_no_stream": 40,
+        "atualizacoes_por_metrica_por_minuto": 1.0,
+        "alarmes_operacionais": 8,
+        "alarmes_alta_resolucao": 0,
+        "alarmes_compostos": 1,
+        "logs_no_cloudwatch": false,
+        "classe_logs": "standard",
+        "gb_logs_por_mes": 0,
+        "retencao_dias": 30,
+        "fator_compressao_logs": 10.0,
+        "gb_escaneados_insights_mes": 0
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonCloudWatch) - snapshot 2026-11-04",
+        "sa-east-1": {
+          "alarme_alta_resolucao_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.405,
+              "unidade": "Alarms",
+              "descricao": "$0.405 per alarm metric month (high resolution) - South America (Sao Paulo)"
+            }
+          ],
+          "alarme_composto_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.675,
+              "unidade": "Alarms",
+              "descricao": "$0.675 per composite alarm month - South America (Sao Paulo)"
+            }
+          ],
+          "alarme_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.135,
+              "unidade": "Alarms",
+              "descricao": "$0.135 per alarm metric month (standard resolution) - South America (Sao Paulo)"
+            }
+          ],
+          "api_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.4e-05,
+              "unidade": "Requests",
+              "descricao": "$0.014 per 1,000 requests"
+            }
+          ],
+          "getmetricdata_metrica": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.4e-05,
+              "unidade": "Metrics",
+              "descricao": "$0.014 per 1,000 metrics requested using GetMetricData API - South America (Sao Paulo)"
+            }
+          ],
+          "insights_scan_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.009,
+              "unidade": "GB",
+              "descricao": "$0.009 per GB log data scanned by CloudWatch Logs Insights queries - South America (Sao Paulo)"
+            }
+          ],
+          "log_ingestao_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.9,
+              "unidade": "GB",
+              "descricao": "$0.90 per GB custom log data ingested in Standard log class - South America (Sao Paulo)"
+            }
+          ],
+          "log_ingestao_ia_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.45,
+              "unidade": "GB",
+              "descricao": "$0.45 per GB custom log data ingested in Infrequent Access log class - South America (Sao Paulo)"
+            }
+          ],
+          "log_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.0408,
+              "unidade": "GB-Mo",
+              "descricao": "$0.0408 per GB-mo of log storage - South America (Sao Paulo)"
+            }
+          ],
+          "log_storage_ia_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.02448,
+              "unidade": "GB-Mo",
+              "descricao": "$0.02448 per GB-Mo for TimedStorage-IA-ByteHrs in South America (Sao Paulo)"
+            }
+          ],
+          "metric_stream_update": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 4.2e-06,
+              "unidade": "Metric Update",
+              "descricao": "$0.0042 per 1,000 metric updates - South America (Sao Paulo)"
+            }
+          ],
+          "metrica_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 10000.0,
+              "preco": 0.3,
+              "unidade": "Metrics",
+              "descricao": "$0.30 per metric-month for the first 10,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 10000.0,
+              "fim": 250000.0,
+              "preco": 0.1,
+              "unidade": "Metrics",
+              "descricao": "$0.10 per metric-month for the next 240,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 250000.0,
+              "fim": 1000000.0,
+              "preco": 0.05,
+              "unidade": "Metrics",
+              "descricao": "$0.05 per metric-month for the next 750,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 1000000.0,
+              "fim": null,
+              "preco": 0.02,
+              "unidade": "Metrics",
+              "descricao": "$0.02 per metric-month for over 1,000,000 metrics - South America (Sao Paulo)"
+            }
+          ]
+        },
+        "us-east-1": {
+          "alarme_alta_resolucao_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.3,
+              "unidade": "Alarms",
+              "descricao": "$0.30 per alarm metric month (high resolution) - US East (Northern Virginia)"
+            }
+          ],
+          "alarme_composto_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.5,
+              "unidade": "Alarms",
+              "descricao": "$0.50 per composite alarm month - US East (Northern Virginia)"
+            }
+          ],
+          "alarme_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.1,
+              "unidade": "Alarms",
+              "descricao": "$0.10 per alarm metric month (standard resolution) - US East (Northern Virginia)"
+            }
+          ],
+          "api_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1e-05,
+              "unidade": "Requests",
+              "descricao": "$0.01 per 1,000 requests"
+            }
+          ],
+          "getmetricdata_metrica": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1e-05,
+              "unidade": "Metrics",
+              "descricao": "$0.01 per 1,000 metrics requested using GetMetricData API - US East (Northern Virginia)"
+            }
+          ],
+          "insights_scan_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.005,
+              "unidade": "GB",
+              "descricao": "$0.005 per GB log data scanned by CloudWatch Logs Insights queries - US East (Northern Virginia)"
+            }
+          ],
+          "log_ingestao_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.5,
+              "unidade": "GB",
+              "descricao": "$0.50 per GB custom log data ingested in Standard log class - US East (Northern Virginia)"
+            }
+          ],
+          "log_ingestao_ia_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.25,
+              "unidade": "GB",
+              "descricao": "$0.25 per GB custom log data ingested in Infrequent Access log class -US East (Northern Virginia)"
+            }
+          ],
+          "log_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.03,
+              "unidade": "GB-Mo",
+              "descricao": "$0.03 per GB-mo of log storage - US East (Northern Virginia)"
+            }
+          ],
+          "log_storage_ia_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.018,
+              "unidade": "GB-Mo",
+              "descricao": "$0.018 per GB-Mo for TimedStorage-IA-ByteHrs in US East (N. Virginia)"
+            }
+          ],
+          "metric_stream_update": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 3e-06,
+              "unidade": "Metric Update",
+              "descricao": "$0.003 per 1,000 metric updates - US East (N. Virginia)"
+            }
+          ],
+          "metrica_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 10000.0,
+              "preco": 0.3,
+              "unidade": "Metrics",
+              "descricao": "$0.30 per metric-month for the first 10,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 10000.0,
+              "fim": 250000.0,
+              "preco": 0.1,
+              "unidade": "Metrics",
+              "descricao": "$0.10 per metric-month for the next 240,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 250000.0,
+              "fim": 1000000.0,
+              "preco": 0.05,
+              "unidade": "Metrics",
+              "descricao": "$0.05 per metric-month for the next 750,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 1000000.0,
+              "fim": null,
+              "preco": 0.02,
+              "unidade": "Metrics",
+              "descricao": "$0.02 per metric-month  for over 1,000,000 metrics - US East (Northern Virginia)"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "investimento_inicial": {
+    "valor_hora": 262.0,
+    "dias_uteis_por_mes": 20.0,
+    "itens": [
+      {
+        "id": "a1",
+        "comunidade": "CIAM",
+        "atividade": "Criação do fluxo de tokens externos sem consent_id",
+        "horas": 80.0,
+        "dias_uteis": 10.0,
+        "predecessora": ""
+      },
+      {
+        "id": "a2",
+        "comunidade": "CIAM",
+        "atividade": "API de consentimento e contratos da API agregada",
+        "horas": 80.0,
+        "dias_uteis": 10.0,
+        "predecessora": ""
+      },
+      {
+        "id": "a3",
+        "comunidade": "CC",
+        "atividade": "API de resources e contratos da API agregada",
+        "horas": 80.0,
+        "dias_uteis": 10.0,
+        "predecessora": ""
+      },
+      {
+        "id": "a4",
+        "comunidade": "Open Finance",
+        "atividade": "Provisionamento da infraestrutura (IaC, VPC, contas)",
+        "horas": 40.0,
+        "dias_uteis": 5.0,
+        "predecessora": ""
+      },
+      {
+        "id": "a5",
+        "comunidade": "Open Finance",
+        "atividade": "Provisionamento de Roles e premissionamentos",
+        "horas": 30.0,
+        "dias_uteis": 5.0,
+        "predecessora": "a4"
+      },
+      {
+        "id": "a6",
+        "comunidade": "Open Finance",
+        "atividade": "API de consulta de saldo agregado e contratos da API agregada",
+        "horas": 180.0,
+        "dias_uteis": 24.0,
+        "predecessora": "a8"
+      },
+      {
+        "id": "a7",
+        "comunidade": "Open Finance",
+        "atividade": "Serviço de agregação de saldos",
+        "horas": 180.0,
+        "dias_uteis": 24.0,
+        "predecessora": "a8"
+      },
+      {
+        "id": "a8",
+        "comunidade": "Open Finance",
+        "atividade": "Modelagem do DynamoDB de saldo e dos índices",
+        "horas": 80.0,
+        "dias_uteis": 10.0,
+        "predecessora": "a5"
+      },
+      {
+        "id": "a9",
+        "comunidade": "Open Finance",
+        "atividade": "Serviço de consulta e paginação",
+        "horas": 80.0,
+        "dias_uteis": 10.0,
+        "predecessora": "a8"
+      },
+      {
+        "id": "a10",
+        "comunidade": "Open Finance",
+        "atividade": "Testes de carga e homologação",
+        "horas": 40.0,
+        "dias_uteis": 5.0,
+        "predecessora": "a6"
+      }
+    ]
+  },
+  "beneficios": {
+    "volume_requisicoes_mes": 613000000.0,
+    "custo_unitario": 0.00042,
+    "percentual_custo_fixo": 70.0,
+    "percentual_custo_variavel": 30.0,
+    "percentual_reducao": 71.0,
+    "racional": "Baseado no estudo de % de contas que mudam de saldo em 1-2 dias da agenda de recepção de dados."
+  }
+}
