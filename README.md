@@ -145,6 +145,8 @@ validação.
 | `recursos/alb.py` | Application Load Balancer: campos, modelo de LCU e detalhamento |
 | `recursos/dynamodb_comum.py` | Preços, escolhas e blocos de capacidade comuns às tabelas DynamoDB |
 | `recursos/fargate_comum.py` | Tamanhos de task, preços e custo por task-hora comuns aos ECS |
+| `recursos/ecs_consumidor.py` | Base dos consumidores Kafka que gravam no Aurora |
+| `recursos/aurora.py`, `kafka_sink.py`, `s3_staging.py`, `glue_carga.py` | Recursos da cadeia de ingestão |
 | `aws_pricing.py` | AWS Price List API genérica (offer code por recurso), cache e fallback |
 | `static/` | Página web: roteador por hash e renderização dirigida por metadados |
 | `.cache/` | Offer files da AWS em cache (renovado a cada 24 h) |
@@ -196,15 +198,37 @@ encontrar os SKUs, caindo no fallback do `config.json`).
 
 ## Recursos já declarados
 
-| Ordem | Id | Recurso | Papel | Status |
-| --- | --- | --- | --- | --- |
-| 10 | `api-gateway` | API Gateway | Porta de entrada das APIs das IFs; encaminha para o ALB | ativo |
-| 20 | `alb` | Application Load Balancer | Recebe as chamadas e distribui para os targets | ativo |
-| 30 | `ecs-consulta` | ECS Fargate — Consulta | Tasks que atendem as consultas vindas do ALB | ativo |
-| 40 | `ecs-carga` | ECS Fargate — Carga | Consumidor Kafka que alimenta a tabela de saldo | ativo |
-| 50 | `dynamodb-saldo` | DynamoDB — Saldo agregado | Tabela lida pelas consultas das IFs | ativo |
-| 60 | `dynamodb-paginacao` | DynamoDB — Controle de paginação | Tabela que controla a paginação | ativo |
-| 70 | `cloudwatch` | CloudWatch | Métricas e alarmes do auto scaling (logs vão para o Datadog) | ativo |
+| Ordem | Id | Recurso | Papel |
+| --- | --- | --- | --- |
+| 10 | `api-gateway` | API Gateway | Porta de entrada das APIs das IFs |
+| 20 | `alb` | Application Load Balancer | Distribui as chamadas para as tasks |
+| 30 | `ecs-consulta` | ECS Fargate — Consulta | Atende as consultas lendo o Aurora |
+| 40 | `aurora` | Aurora PostgreSQL | Saldos, consentimentos e resources |
+| 50 | `kafka-sink` | Kafka Sink → S3 | Entrega os eventos de saldo no bucket |
+| 60 | `s3-staging` | S3 — Staging | Guarda os arquivos até a carga |
+| 70 | `glue-carga` | AWS Glue — Carga | Lê o S3 e carrega o Aurora |
+| 80 | `ecs-consentimentos` | ECS Fargate — Consentimentos | Consome o tópico e atualiza a tabela |
+| 90 | `ecs-resources` | ECS Fargate — Resources | Consome o tópico e atualiza a tabela |
+| 100 | `cloudwatch` | CloudWatch | Métricas e alarmes do auto scaling |
+
+```
+                    ┌─ API GW → ALB → ECS Consulta ─┐
+IFs ────────────────┤                               ├──→ Aurora
+                    └───────────────────────────────┘        ▲
+                                                             │
+Kafka saldos ──→ Kafka Sink ──→ S3 ──→ Glue ─────────────────┤
+Kafka consentimentos ──→ ECS Consentimentos ─────────────────┤
+Kafka resources ──────→ ECS Resources ───────────────────────┘
+```
+
+## Estratégia anterior
+
+A primeira modelagem — DynamoDB de saldo agregado, DynamoDB de controle de
+paginação e um ECS consumindo o Kafka direto para o DynamoDB — continua no
+projeto: os módulos `dynamodb_saldo.py`, `dynamodb_paginacao.py` e `ecs_carga.py`
+seguem em `recursos/`, e suas seções em `config.json` estão com
+`habilitado: false`. Para voltar a ela, reimporte os módulos em `ATIVOS`
+(`recursos/__init__.py`) e reative as seções.
 
 Todos têm modelo de custo. Para declarar um recurso futuro antes de modelá-lo,
 acrescente-o a `PLANEJADOS` em `recursos/__init__.py`: ele aparece nas telas com o
@@ -464,318 +488,102 @@ e alarmes do ASG) e o DynamoDB consultado — cada um é um recurso próprio.
 
 ---
 
-# Recurso: ECS Fargate — Carga
+# Recurso: Aurora PostgreSQL
 
-Consumidor Kafka em Java que alimenta a tabela de saldo agregado. Para cada evento
-de alteração de saldo:
+Base relacional que concentra saldos, consentimentos e resources. Recebe três
+fluxos de escrita (Glue, ECS de consentimentos e ECS de resources) e serve as
+consultas do ECS de consulta — toda essa carga é **herdada** dos recursos
+vizinhos com `herdar_carga`.
 
-1. lê o evento do tópico;
-2. consulta a API de consentimento do cliente — **em 100% dos eventos**;
-3. só para quem tem consentimento, busca o `resource_id` do `account_id`;
-4. grava o registro no DynamoDB de saldo agregado.
-
-Este recurso **não herda a volumetria do ALB** (só a região): quem dita o
-dimensionamento é o tópico, não a TPM das IFs.
-
-## Volume do tópico
-
-`eventos_por_minuto` é o campo central e fica aberto para ajuste. Há também o modo
-`derivar_de_clientes`, que calcula o volume a partir de `numero_clientes ×
-alteracoes_por_cliente_por_dia` — útil para conferir a ordem de grandeza
-(70 M × 5/dia = 243.056 eventos/min).
-
-`percentual_eventos_com_consentimento` separa os dois caminhos do fluxo: a consulta
-de consentimento roda sempre, a busca do `resource_id` e a escrita só para a fatia
-com consentimento. A CPU e a latência médias por evento saem dessa ponderação:
-
-```
-CPU média      = cpu_por_evento + pct × cpu_adicional
-latência média = lat_consentimento + pct × (lat_resource + lat_escrita)
-```
-
-## Três restrições, não duas
-
-Além de CPU e concorrência de I/O, um consumidor Kafka tem um **teto rígido de
-paralelismo**: uma partição é consumida por um único consumidor.
-
-| Restrição | Cálculo |
+| Modo | Como é cobrado |
 | --- | --- |
-| CPU | `eventos/s × CPU média / utilizacao_alvo ÷ vcpu_por_task` |
-| Concorrência de I/O | `eventos/s × latência média ÷ concorrencia_por_task` |
-| **Teto de partições** | `particoes_topico ÷ consumidores_por_task` |
+| `serverless_v2` | ACU-hora, em cada instância (writer + réplicas) |
+| `provisionado` | Hora de instância, por classe |
 
-Se o pico exigir mais tasks do que as partições permitem, a calculadora limita o
-número de tasks e **avisa que o lag do tópico vai crescer** — adicionar CPU não
-resolve, só mais partições.
+A ACU média é dimensionada pela carga: `(consultas/s + escritas/s) ÷
+transacoes_por_acu_por_segundo`, presa entre o mínimo e o máximo configurados. Se
+a carga passar do teto, a tela avisa que o banco satura.
 
-## Carga que este consumidor joga no DynamoDB
-
-O módulo expõe `eventos_com_consentimento_s`, `leituras_dynamo_s` e
-`escritas_dynamo_s`, que a tabela de saldo consome diretamente quando
-`herdar_carga_dos_ecs` está ligado: 1.215 leituras/s no GSI `account_id` (busca do
-`resource_id`) e 1.215 escritas/s na tabela.
-
-Se a herança for desligada na tabela de saldo, o módulo volta a comparar os dois
-números e avisa quando divergem mais de 25%.
-
-## Parâmetros e premissas estimadas
-
-| Parâmetro | Default | De onde veio |
-| --- | --- | --- |
-| `eventos_por_minuto` | 243.000 | 70 M clientes × 5 alterações/dia |
-| `percentual_eventos_com_consentimento` | 30 | **Estimativa** |
-| `tempo_cpu_por_evento_ms` | 6,0 | **Estimativa** — desserialização + chamada de consentimento (Java) |
-| `tempo_cpu_adicional_ms` | 8,0 | **Estimativa** — `resource_id` + escrita no DynamoDB |
-| `latencia_consentimento_ms` | 50 | **Estimativa** — API externa |
-| `latencia_resource_ms` / `latencia_escrita_ms` | 20 / 10 | **Estimativa** |
-| `concorrencia_por_task` | 100 | **Estimativa** — pool de threads de um consumidor Java |
-| `particoes_topico` | 256 | **Estimativa** |
-| `consumidores_por_task` | 2 | **Estimativa** |
-| `vcpu_por_task` / `memoria_gb_por_task` | 2,0 / 4,0 | Tamanho típico de JVM com consumo em lote |
-| `utilizacao_alvo_cpu` | 60 | Alvo do target tracking |
-| `tasks_minimas` / `tasks_maximas` | 2 / 500 | Limites do ASG |
-| `horas_pico_por_dia` | 24 | O tópico produz continuamente |
-
-### Ordem de grandeza (sa-east-1, 243.000 eventos/min = 4.050/s)
-
-| Cenário | Tasks | Restrição | US$/mês |
+| Classe | I/O | ACU-hora | Armazenamento |
 | --- | --- | --- | --- |
-| Default (2 vCPU / 4 GB, x86) | 29 | CPU | 3.541,25 |
-| ARM / Graviton | 29 | CPU | 2.837,17 |
-| **CPU otimizada (2 + 3 ms)** | 10 | CPU | **1.221,12** |
-| 100% com consentimento | 48 | CPU | 5.861,38 |
-| 5% com consentimento | 22 | CPU | 2.686,46 |
-| 60.000 eventos/min | 8 | CPU | 976,90 |
-| 1.000.000 eventos/min | 117 | CPU | 14.287,10 |
-| **32 partições** | 16 | **Partições** | 1.953,79 ⚠ |
-| Pico de 8 h/dia, 20% fora | 29 | CPU | 1.668,86 |
+| Standard | US$ 0,28/milhão | US$ 0,25 | US$ 0,19/GB-mês |
+| I/O-Optimized | incluso | US$ 0,33 | US$ 0,428/GB-mês |
 
-O fluxo é **limitado por CPU**, não por I/O: com 59 ms de latência média são apenas
-239 eventos em voo, que uma dúzia de tasks absorveria. O que custa é o
-processamento — reduzir a CPU por evento de 8,4 ms para 2,9 ms corta 65% da conta.
-Latência das dependências e concorrência por task **não mudam nada** neste ponto
-de operação (verificável nos cenários acima: 200 ms de latência dá o mesmo valor).
-
-## Fora do escopo do total
-
-O cluster Kafka (MSK ou terceiro), Data Transfer entre AZs, ECR, CloudWatch e a
-capacidade de escrita do DynamoDB que este consumidor consome.
+Quando o I/O passa de 25% da conta, a calculadora calcula o total na outra classe
+e avisa se compensa. Com os defaults atuais, compensa: **US$ 3.273,90 → US$ 1.600,00**.
 
 ---
 
-# Recurso: DynamoDB — Saldo agregado
+# Recurso: Kafka Sink → S3
 
-Tabela de saldo agregado: 23 milhões de registros, um LSI (`id_eq3`) e dois GSIs
-(`account_id` e `if_id` / `last_balance_change`). Os defaults ficam em
-`config.json → recursos.dynamodb-saldo.entradas`.
+Entrega os eventos de saldo do tópico para o bucket, em um de dois caminhos:
 
-## Dois fluxos batem nesta tabela
+| Modo | Cobrança |
+| --- | --- |
+| `msk_connect` | MCU-hora provisionada (US$ 0,175), independente do volume |
+| `data_channel` | US$ 0,01 por GB processado, sem capacidade a dimensionar |
 
-| Fluxo | Taxa | Acesso |
-| --- | --- | --- |
-| **ECS de consulta** | TPS das IFs (2.500/s) | Query no GSI `if_id`/`last_balance_change`, uma página de 500 registros |
-| **ECS de carga** | eventos com consentimento (1.215/s) | Query no GSI `account_id` para achar o `resource_id` (1 item) + gravação do registro |
+O recurso também publica a volumetria que o resto da cadeia consome: eventos/mês,
+GB gravados e **quantos arquivos** chegam ao bucket — cada partição fecha um
+arquivo a cada flush, e é isso que vira PUT no S3.
 
-Com `herdar_carga_dos_ecs` (default), a taxa de leitura do GSI `account_id` e as
-escritas vêm do **ECS de carga** (`eventos_com_consentimento_s`), e a taxa das
-consultas vem do TPM do ALB. Isso elimina a divergência que existia quando as
-escritas eram estimadas por `numero_registros × atualizacoes_por_registro_por_dia`:
-agora os dois recursos descrevem a mesma carga.
-
-Desligando a herança, voltam os campos próprios (`eventos_com_consentimento_s` e
-`atualizacoes_por_registro_por_dia`).
-
-## Tamanho do item
-
-O item é informado como um **exemplo JSON** e medido como o DynamoDB cobra: soma
-de nome + valor de cada atributo, sem a sintaxe do JSON. O exemplo default (6
-atributos, UUIDs e timestamp) dá **265 B + 100 B de overhead = 365 B**.
-
-| Destino | Projeção | Bytes/item | Armazenamento |
-| --- | --- | --- | --- |
-| Tabela base | item completo | 365 B | 7,82 GB |
-| LSI `id_eq3` | KEYS_ONLY | 210 B | 4,50 GB |
-| GSI `account_id` | KEYS_ONLY | 210 B | 4,50 GB |
-| GSI `if_id`/`last_balance_change` | ALL | 365 B | 7,82 GB |
-| **Total** | | | **24,63 GB** |
-
-## Modelo de cálculo
-
-O consumo é apurado **por alvo de capacidade**, porque tabela e GSIs são cobrados
-separadamente — o LSI, não: ele compartilha a capacidade da tabela base.
-
-**Leitura.** Cada consulta lê N itens; o total é arredondado para blocos de 4 KB e
-a leitura eventualmente consistente custa metade:
-
-```
-unidades por consulta = ceil(itens × bytes_projetados / 4096) × (0,5 se eventual)
-unidades/s por alvo   = taxa da origem × consultas × unidades por consulta
-```
-
-A taxa é a do fluxo que usa aquele índice:
-
-| Destino | Origem | Cálculo | Unidades/s |
-| --- | --- | --- | --- |
-| GSI `if_id` | ECS consulta | 2.500/s × 1 × `ceil(500×365/4096)` = 45 | 112.500 |
-| GSI `account_id` | ECS carga | 1.215/s × 1 × `ceil(1×210/4096)` = 1 | 1.215 |
-
-(valores com leitura **fortemente consistente**; com eventual, metade)
-
-`herdar_itens_da_pagina` liga os itens por consulta ao **registros por página do
-ALB**, então o painel de simulação da tela de Totais move o DynamoDB também.
-
-**Escrita.** Blocos de 1 KB, replicados nos índices que projetam o atributo
-alterado:
-
-```
-escritas/s          = eventos_com_consentimento × escritas_por_evento   (herdado do ECS de carga)
-unidades/s por alvo = (escritas × fator + novos) × ceil(bytes_projetados / 1024)
-```
-
-Com 1.215 eventos/s: 1.215 un/s na tabela base e 2.430 un/s no GSI `if_id` (fator
-2×), totalizando **3.646 unidades de escrita por segundo**.
-
-Três regras que a calculadora aplica:
-
-- O **GSI `if_id` custa 2 escritas** por atualização: `last_balance_change` é a
-  sort key, então a entrada antiga é removida e a nova inserida
-  (`gsi_if_sort_key_muda`).
-- Índices **KEYS_ONLY cujas chaves não mudam não são tocados** pela atualização —
-  por isso o GSI `account_id` não consome escrita no fluxo de saldo, só quando
-  entram registros novos.
-- O **free tier** (25 GB, 25 RCU, 25 WCU) é por conta, não por tabela:
-  `aplicar_free_tier` vem desligado para não dar o desconto em cada recurso.
-
-## Parâmetros principais
-
-| Parâmetro | Default | Significado |
-| --- | --- | --- |
-| `numero_registros` | 23.000.000 | Registros na tabela |
-| `exemplo_item` | JSON do saldo agregado | Item de exemplo, medido dinamicamente |
-| `overhead_item_bytes` | 100 | Metadados internos por item |
-| `tamanho_chaves_bytes` | 110 | Tamanho projetado nos índices KEYS_ONLY |
-| `lsi_eq3_projecao` | `keys_only` | Projeção do LSI `id_eq3` |
-| `gsi_account_projecao` | `keys_only` | Projeção do GSI `account_id` |
-| `gsi_if_projecao` | `all` | Projeção do GSI `if_id`/`last_balance_change` |
-| `consistencia_leitura` | `eventual` | Eventual custa metade da forte |
-| `herdar_carga_dos_ecs` | `true` | Taxas vindas do ECS de consulta e do ECS de carga |
-| `consultas_gsi_if_por_transacao` | 1,0 | O polling consulta por `if_id` + data |
-| `consultas_gsi_account_por_evento` | 1,0 | O ECS de carga busca o `resource_id` do `account_id` |
-| `itens_por_consulta_gsi_account` | 1 | A busca do `resource_id` devolve um item |
-| `escritas_por_evento` | 1,0 | Cada evento com consentimento grava um registro |
-| `novos_registros_por_dia` | 23.000 | Entrada de novos registros (0,1%/dia) |
-| `modo_capacidade` | `on_demand` | `on_demand` ou `provisionado` + auto scaling |
-| `classe_tabela` | `standard` | `standard` ou `standard_ia` |
-| `pitr_habilitado` | `true` | Backup contínuo, cobrado por GB-mês |
-| `streams_habilitado` | `false` | Streams para alimentar o ECS de carga |
-
-### Ordem de grandeza (sa-east-1, 2.500 TPS, 23 M registros)
-
-Preços de 2026-11-05: $0,1875/M RRU, $0,9375/M WRU, $0,375/GB-mês, PITR $0,30/GB-mês.
-
-Com a configuração atual (**leitura fortemente consistente**, on-demand):
-
-| Cenário | Leitura total | Escrita | US$/mês |
-| --- | --- | --- | --- |
-| Default (forte, on-demand, GSI ALL) | 113.715 un/s | 3.646 un/s | 64.142,06 |
-| **Leitura eventual** | 56.858 un/s | 3.646 un/s | **36.509,31** |
-| **Provisionado, alvo 70%** | 113.715 un/s | 3.646 un/s | **26.482,17** |
-| **GSI `if_id` com KEYS_ONLY** | 66.215 un/s | 3.646 un/s | **41.054,81** |
-| GSI `account_id` com ALL | 113.715 un/s | 4.861 un/s | 67.096,75 |
-| ECS de carga sem ler o GSI `account_id` | 112.500 un/s | 3.646 un/s | 63.551,57 |
-| 50% dos eventos geram escrita | 113.715 un/s | 1.824 un/s | 59.713,38 |
-| **Eventual + provisionado + GSI KEYS_ONLY** | 33.108 un/s | 3.646 un/s | **10.312,31** |
-
-A leitura é **86% da conta** (US$ 55,3 mil de US$ 64,1 mil) e vem quase toda do
-ECS de consulta: a leitura do ECS de carga são 1.215 un/s contra 112.500 un/s das
-consultas das IFs — menos de 1% do consumo de leitura, porque busca 1 item em vez
-de uma página de 500.
-
-Três alavancas, em ordem de efeito:
-
-- **Leitura eventual em vez de forte: −43%.** O polling de saldo agregado
-  normalmente tolera consistência eventual.
-- **Capacidade provisionada: −59%.** A carga é constante 24×7, exatamente o caso
-  em que on-demand é mau negócio.
-- **Projeção do GSI `if_id`.** Com `ALL` cada consulta lê 365 B por item; com
-  `KEYS_ONLY`, 210 B — 36% mais barato. Só vale se o polling não precisar de
-  atributos além dos `resourceIds`.
-
-Combinando as três: **US$ 10,3 mil/mês**, contra US$ 64,1 mil.
-
-O volume do tópico Kafka agora propaga até aqui: 60.000 eventos/min deixam a
-tabela em US$ 57,0 mil; 1.000.000 eventos/min a levam a US$ 93,6 mil.
-
-## Fora do escopo do total
-
-Transações (`TransactWrite` custa 2×), DAX, backups on-demand, exports e Data
-Transfer entre regiões.
+O `intervalo_flush_segundos` troca custo por latência: flush curto gera muitos
+arquivos pequenos, que encarecem o S3 e deixam o Glue mais lento. A tela avisa
+quando o arquivo médio fica abaixo de 1 MB.
 
 ---
 
-# Recurso: DynamoDB — Controle de paginação
+# Recurso: S3 — Staging
 
-Tabela que guarda o cursor de cada consulta paginada. Diferente da tabela de
-saldo, aqui **o custo é dominado por escrita** (86% do total): há ao menos uma
-escrita por página servida, e a escrita custa 5× a leitura por unidade.
-
-> Volumetria e item desta tabela foram **estimados**, não informados. Cada premissa
-> é um campo editável e as três que mais pesam estão marcadas nas notas da tela.
-
-## Modelo do fluxo
-
-Cada sessão de paginação cria um token na primeira página e, nas páginas
-seguintes, lê o token para retomar de onde parou e atualiza o cursor. Os itens
-saem por TTL, e a exclusão por TTL **não consome capacidade**.
+Bucket entre o sink e o Glue. Volume e número de arquivos vêm do sink; as
+execuções que fazem LIST vêm do Glue.
 
 ```
-sessões/s   = TPS / paginas_por_sessao
-leituras/s  = TPS − sessões/s                     (a 1ª página de cada sessão não lê)
-escritas/s  = sessões/s + leituras/s              (criação + atualização do cursor)
-itens vivos = sessões/s × ttl_minutos × 60
+PUT  = arquivos entregues pelo sink          US$ 7,00/milhão
+GET  = arquivos × leituras_por_arquivo       US$ 0,56/milhão
+LIST = execuções do Glue × LIST por execução US$ 0,56/milhão
+armazenamento = GB do mês × retenção/30      US$ 0,0405/GB-mês
 ```
 
-Com 2.500 requisições de página por segundo e 5 páginas por sessão: 500 sessões/s,
-2.000 leituras/s e 2.500 escritas/s, com 450 mil tokens vivos (0,18 GB).
+PUT custa 12,5× o GET, então o custo aqui é governado pelo número de arquivos —
+não pelo volume de dados.
 
-## Parâmetros e premissas estimadas
+---
 
-| Parâmetro | Default | De onde veio |
-| --- | --- | --- |
-| `paginas_por_sessao` | 5 | **Estimativa** — quantas páginas a IF percorre antes de abandonar o cursor |
-| `atualiza_cursor_por_pagina` | `true` | **Estimativa** — supõe cursor mutável; desligue se a posição vier na requisição |
-| `ttl_minutos` | 15 | **Estimativa** — define quantos itens ficam vivos; o slot do polling é de 1 h |
-| `consistencia_leitura` | `forte` | A paginação lê o que acabou de escrever (read-after-write) |
-| `exemplo_item` | token com 10 atributos | **Estimativa** — 324 B de atributos + 100 B de overhead = 424 B |
-| `guardar_pagina_no_item` | `false` | Guarda só o cursor, não a lista de ids |
-| `bytes_por_id` / `ids_por_token` | 38 / do ALB | Usados apenas se o token guardar a página |
-| `pitr_habilitado` | `false` | Tabela efêmera com TTL curto não costuma precisar de backup contínuo |
+# Recurso: AWS Glue — Carga
 
-### Ordem de grandeza (sa-east-1, 2.500 req de página/s)
+Lê o S3 e carrega o Aurora, em modo **agendado** (a cada N minutos) ou
+**streaming** (contínuo). No agendado paga-se DPU × duração de cada execução, com
+mínimo de 1 minuto por execução; o intervalo é também a **latência do dado**.
 
-| Cenário | Escrita | US$/mês |
-| --- | --- | --- |
-| Default (cursor mutável, forte, on-demand) | 2.500 un/s | 7.047,07 |
-| **Token imutável** (sem escrita de cursor) | 500 un/s | **2.187,07** |
-| Provisionado, alvo 70% | 2.500 un/s | 2.908,87 |
-| Leitura eventual | 2.500 un/s | 6.561,07 |
-| **Imutável + eventual + provisionado** | 500 un/s | **702,63** |
-| **Guardar os 500 ids no token** | 47.500 un/s | **120.288,05** |
-| TTL de 2 horas | 2.500 un/s | 7.047,53 |
+A tela traz a comparação direta entre frequências, com o mesmo job (2 DPUs,
+2 min por execução, Glue 6.0+):
 
-Três conclusões:
+| Frequência | Execuções/mês | DPU-horas | Latência | US$/mês |
+| --- | --- | --- | --- | --- |
+| A cada 1 min | 43.200 | 2.880 | até 1 min | 1.391,04 ⚠ |
+| **A cada 5 min** | 8.640 | 576 | até 5 min | **278,21** |
+| A cada 10 min | 4.320 | 288 | até 10 min | 139,10 |
+| A cada 15 min | 2.880 | 192 | até 15 min | 92,74 |
+| A cada 30 min | 1.440 | 96 | até 30 min | 46,37 |
+| A cada 60 min | 720 | 48 | até 60 min | 23,18 |
+| Glue Streaming | contínuo | 1.440 | segundos | 695,52 |
 
-- **Guardar a página dentro do token custa 17× mais.** O item vai de 424 B para
-  19,4 KB, o que leva cada escrita de 1 para 19 unidades. É a decisão de design
-  mais cara desta tabela.
-- **Token imutável corta 69%.** Se a posição da paginação vier na própria
-  requisição (ou o token for reescrito só na criação), desaparecem 2.000
-  escritas/s.
-- **TTL quase não importa para o custo** — só muda o armazenamento, que aqui é
-  US$ 0,07. O que importa é a taxa de escrita.
+O ⚠ marca os intervalos menores que a duração da execução, em que os jobs se
+sobrepõem. Note que **1 minuto custa o dobro do streaming** e entrega latência
+pior: abaixo de ~3 minutos, o streaming passa a ser a opção melhor e mais barata.
 
-Combinando as três alavancas sensatas (token imutável, leitura eventual onde
-couber, capacidade provisionada), a tabela sai de US$ 7 mil para **US$ 703/mês**.
+Versões: Glue 6.0+ (Gen2) custa US$ 0,483/DPU-h contra US$ 0,69 da 4.0/5.0; o modo
+Flex sai por US$ 0,315, em capacidade não garantida.
+
+---
+
+# Recursos: ECS Fargate — Consentimentos e Resources
+
+Dois consumidores Kafka que mantêm as tabelas de consentimentos e de resources no
+Aurora. Compartilham a lógica em `recursos/ecs_consumidor.py` e o mesmo trio de
+restrições do ECS de consulta — CPU, concorrência de I/O e **teto de partições** —
+além de publicarem suas escritas (`escritas_aurora_s`) para o Aurora somar na carga.
 
 ---
 

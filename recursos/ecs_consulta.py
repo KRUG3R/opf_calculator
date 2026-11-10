@@ -1,6 +1,6 @@
 """ECS Fargate - Consulta: tasks que atendem as consultas vindas do ALB.
 
-A aplicacao consulta o DynamoDB e devolve a pagina de slots dentro do response
+A aplicacao consulta o Aurora e devolve a pagina de slots dentro do response
 time alvo. O numero de tasks e o maximo entre duas restricoes:
 
   CPU          vCPUs = TPS x tempo de CPU por request / utilizacao alvo
@@ -110,6 +110,12 @@ CAMPOS = [
                 "Requests simultâneos por task",
                 minimo=1,
                 ajuda="Quantas consultas em voo uma task sustenta dentro do response time.",
+            ),
+            base.numero(
+                "consultas_aurora_por_transacao",
+                "Consultas ao Aurora por transação",
+                passo=0.1,
+                ajuda="Quantas queries cada requisição dispara no banco.",
             ),
         ],
     ),
@@ -266,6 +272,8 @@ def calcular(entradas, recurso_cfg, preco, config=None):
             "unidades_mes": requests_mes,
             "requests_mes": requests_mes,
             "servicos": 1,
+            # Carga que estas tasks jogam no Aurora.
+            "consultas_aurora_s": tps_pico * entradas.get("consultas_aurora_por_transacao", 1.0),
         },
         "resumo": [
             {"rotulo": "TPM total", "valor": fmt_int(tpm_total)},
@@ -509,12 +517,12 @@ def _secoes(entradas, volumetria, herdado, pico, fora, preco, v):
             [
                 "O Fargate cobra vCPU e memória por segundo de execução da task, com mínimo de 1 minuto; "
                 "aqui o custo é agregado por hora provisionada.",
-                "A espera pela resposta do DynamoDB não consome CPU: é a restrição de concorrência que "
+                "A espera pela resposta do Aurora não consome CPU: é a restrição de concorrência que "
                 "sustenta o response time alvo, não o tempo de CPU.",
                 "O ASG leva de alguns segundos a poucos minutos para subir tasks; a utilização alvo de CPU "
                 "é a folga que absorve a demanda enquanto a escala acontece.",
                 "Não estão inclusos: Data Transfer, ECR (armazenamento e pull das imagens), CloudWatch "
-                "(métricas, logs e alarmes do ASG) e o custo do DynamoDB consultado.",
+                "(métricas, logs e alarmes do ASG) e o custo do Aurora consultado.",
             ],
         ),
     ]

@@ -24,7 +24,7 @@ NOME = "CloudWatch"
 NOME_CURTO = "CloudWatch"
 DESCRICAO = "Métricas e alarmes que disparam o auto scaling dos ECSs."
 OFFER_CODE = "AmazonCloudWatch"
-ORDEM = 70
+ORDEM = 100
 STATUS = "ativo"
 
 MODOS_COLETA = [
@@ -208,7 +208,7 @@ def region_efetiva(entradas, config):
     return entradas["region"]
 
 
-SERVICOS_OBSERVADOS = ["ecs-consulta", "ecs-carga"]
+SERVICOS_OBSERVADOS = ["ecs-consulta", "ecs-consentimentos", "ecs-resources"]
 
 
 def contexto_dos_servicos(config):

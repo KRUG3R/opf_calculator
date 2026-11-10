@@ -20,21 +20,31 @@ import cambio
 from . import (
     alb,
     api_gateway,
+    aurora,
     base,
     cloudwatch,
-    dynamodb_paginacao,
-    dynamodb_saldo,
-    ecs_carga,
+    ecs_consentimentos,
     ecs_consulta,
+    ecs_resources,
+    glue_carga,
+    kafka_sink,
+    s3_staging,
 )
 
+# Estratégia atual: Kafka → S3 → Glue → Aurora, com o ECS de consulta lendo o
+# Aurora. Os módulos da estratégia anterior (dynamodb_saldo, dynamodb_paginacao e
+# ecs_carga) seguem no pacote, fora desta lista: para voltar a ela, basta
+# reimportá-los aqui e reativar as seções correspondentes em config.json.
 ATIVOS = [
     api_gateway,
     alb,
     ecs_consulta,
-    ecs_carga,
-    dynamodb_saldo,
-    dynamodb_paginacao,
+    aurora,
+    kafka_sink,
+    s3_staging,
+    glue_carga,
+    ecs_consentimentos,
+    ecs_resources,
     cloudwatch,
 ]
 
@@ -277,36 +287,35 @@ def calcular_totais(config, recebidas_por_recurso=None):
 # sobre a configuracao atual e a economia sai da diferenca de total.
 OPORTUNIDADES = [
     {
-        "titulo": "Leitura eventual na tabela de saldo",
-        "detalhe": "O polling de saldo agregado costuma tolerar consistência eventual, "
-        "que custa metade da leitura fortemente consistente.",
-        "overrides": {"dynamodb-saldo": {"consistencia_leitura": "eventual"}},
+        "titulo": "Aurora na classe I/O-Optimized",
+        "detalhe": "Com I/O pesando na conta, a classe I/O-Optimized troca o custo por operação "
+        "por um ACU e um armazenamento mais caros — costuma compensar acima de 25%.",
+        "overrides": {"aurora": {"classe_armazenamento": "io_optimized"}},
     },
     {
-        "titulo": "Capacidade provisionada no DynamoDB",
-        "detalhe": "A carga é constante 24×7, caso em que on-demand é mais caro que "
-        "capacidade provisionada com auto scaling.",
-        "overrides": {
-            "dynamodb-saldo": {"modo_capacidade": "provisionado"},
-            "dynamodb-paginacao": {"modo_capacidade": "provisionado"},
-        },
+        "titulo": "Glue em modo Flex",
+        "detalhe": "Capacidade não garantida, 35% mais barata por DPU-hora — serve para uma carga "
+        "que tolera atraso eventual.",
+        "overrides": {"glue-carga": {"versao": "flex_gen2"}},
     },
     {
-        "titulo": "GSI if_id com projeção KEYS_ONLY",
-        "detalhe": "Se o polling só precisa dos resourceIds, o índice guarda 210 B por "
-        "item em vez de 365 B e cada consulta lê menos blocos.",
-        "overrides": {"dynamodb-saldo": {"gsi_if_projecao": "keys_only"}},
+        "titulo": "Glue a cada 15 minutos",
+        "detalhe": "Menos execuções pagando o mínimo de 1 minuto, em troca de mais latência no dado.",
+        "overrides": {"glue-carga": {"intervalo_minutos": 15}},
     },
     {
         "titulo": "Tasks em Graviton (ARM)",
         "detalhe": "O Fargate ARM custa cerca de 20% menos por vCPU-hora e por GB-hora.",
-        "overrides": {"ecs-consulta": {"arquitetura": "arm"}, "ecs-carga": {"arquitetura": "arm"}},
+        "overrides": {
+            "ecs-consulta": {"arquitetura": "arm"},
+            "ecs-consentimentos": {"arquitetura": "arm"},
+            "ecs-resources": {"arquitetura": "arm"},
+        },
     },
     {
-        "titulo": "Token de paginação imutável",
-        "detalhe": "Sem reescrever o cursor a cada página, desaparece uma escrita por "
-        "página servida na tabela de paginação.",
-        "overrides": {"dynamodb-paginacao": {"atualiza_cursor_por_pagina": False}},
+        "titulo": "Flush do sink a cada 5 minutos",
+        "detalhe": "Arquivos maiores no S3 reduzem os PUTs e aceleram a leitura do Glue.",
+        "overrides": {"kafka-sink": {"intervalo_flush_segundos": 300}},
     },
 ]
 
@@ -316,9 +325,9 @@ INDICADORES = [
     ("alb", "tpm_por_if", "TPM por IF", "inteiro"),
     ("alb", "registros_por_pagina", "Registros por página", "inteiro"),
     ("alb", "response_time_s", "Response time alvo", "segundos"),
-    ("ecs-carga", "numero_clientes", "Clientes monitorados", "inteiro"),
-    ("ecs-carga", "eventos_por_minuto", "Eventos de saldo por minuto", "inteiro"),
-    ("dynamodb-saldo", "numero_registros", "Registros na tabela de saldo", "inteiro"),
+    ("kafka-sink", "eventos_por_minuto", "Eventos de saldo por minuto", "inteiro"),
+    ("glue-carga", "intervalo_minutos", "Carga do Glue a cada (min)", "inteiro"),
+    ("aurora", "storage_gb", "Armazenamento no Aurora (GB)", "inteiro"),
 ]
 
 

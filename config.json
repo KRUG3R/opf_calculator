@@ -226,36 +226,473 @@
         }
       }
     },
-    "ecs-carga": {
+    "aurora": {
       "habilitado": true,
       "entradas": {
-        "modo_volumetria": "eventos_por_minuto",
-        "eventos_por_minuto": 50000.0,
-        "numero_clientes": 70000000.0,
-        "alteracoes_por_cliente_por_dia": 5.0,
-        "percentual_eventos_com_consentimento": 32.0,
-        "fator_pico": 1.0,
+        "modo_capacidade": "serverless_v2",
+        "classe_armazenamento": "standard",
+        "region": "sa-east-1",
+        "acu_minima": 2,
+        "acu_maxima": 64,
+        "transacoes_por_acu_por_segundo": 400,
+        "instancia": "db.r7g.large",
+        "replicas_leitura": 1,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "herdar_carga": true,
+        "consultas_por_segundo": 60,
+        "escritas_por_segundo": 1000,
+        "ios_por_consulta": 8.0,
+        "ios_por_escrita": 2.0,
+        "storage_gb": 500,
+        "backup_retido_gb": 0
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonRDS)",
+        "sa-east-1": {
+          "instancias": {
+            "db.r6g.large": 0.537,
+            "db.r8g.24xlarge": 21.06432,
+            "db.t4g.large": 0.306,
+            "db.r8gd.24xlarge": 23.812,
+            "db.r8gd.xlarge": 0.992,
+            "db.r6i.24xlarge": 28.8,
+            "db.r8g.16xlarge": 14.04288,
+            "db.r6i.8xlarge": 9.6,
+            "db.r8g.large": 0.43884,
+            "db.r7g.8xlarge": 7.03098,
+            "db.r7i.16xlarge": 14.7552,
+            "db.r7i.24xlarge": 22.1328,
+            "db.r4.16xlarge": 19.2,
+            "db.r7i.large": 0.4611,
+            "db.r4.large": 0.6,
+            "db.r8gd.48xlarge": 47.624,
+            "db.r7g.large": 0.43884,
+            "db.r6gd.16xlarge": 20.621,
+            "db.r5.4xlarge": 4.8,
+            "db.r6i.4xlarge": 4.8,
+            "db.r7g.16xlarge": 14.06196,
+            "db.r6i.large": 0.6,
+            "db.r6i.xlarge": 1.2,
+            "db.r5.16xlarge": 19.2,
+            "db.r5.large": 0.6,
+            "db.r7g.xlarge": 0.87927,
+            "db.r8g.8xlarge": 7.02144,
+            "db.r6g.8xlarge": 8.595,
+            "db.r5.24xlarge": 28.8,
+            "db.r6i.16xlarge": 19.2,
+            "db.r5.xlarge": 1.2,
+            "db.r6gd.8xlarge": 10.31,
+            "db.r5.8xlarge": 9.6,
+            "db.r8g.4xlarge": 3.51072,
+            "db.t3.large": 0.336,
+            "db.r7i.48xlarge": 44.2656,
+            "db.t3.medium": 0.168,
+            "db.r8gd.16xlarge": 15.875,
+            "db.r6g.16xlarge": 17.19,
+            "db.r8g.48xlarge": 42.12864,
+            "db.r7i.4xlarge": 3.6888,
+            "db.r8gd.8xlarge": 7.937,
+            "db.r8g.xlarge": 0.87768,
+            "db.t4g.medium": 0.153,
+            "db.r6gd.4xlarge": 5.155,
+            "db.r7i.8xlarge": 7.3776,
+            "db.r7i.xlarge": 0.9222,
+            "db.r6g.4xlarge": 4.298,
+            "db.r8gd.4xlarge": 3.969,
+            "db.r6gd.xlarge": 1.289,
+            "db.r4.2xlarge": 2.4,
+            "db.r7g.4xlarge": 3.51549,
+            "db.r6g.xlarge": 1.074
+          },
+          "instancias_io_opt": {
+            "db.r7g.16xlarge": 18.28023,
+            "db.r5.4xlarge": 6.24,
+            "db.r5.16xlarge": 24.96,
+            "db.r7i.16xlarge": 19.18176,
+            "db.r6g.16xlarge": 22.347,
+            "db.r7i.xlarge": 1.19886,
+            "db.r6i.large": 0.78,
+            "db.r6i.4xlarge": 6.24,
+            "db.r8g.large": 0.57081,
+            "db.r6gd.8xlarge": 13.403,
+            "db.r8gd.4xlarge": 5.159,
+            "db.r8g.8xlarge": 9.13296,
+            "db.r7i.48xlarge": 57.54528,
+            "db.r7g.large": 0.57081,
+            "db.r8g.16xlarge": 18.26592,
+            "db.r8gd.48xlarge": 61.911,
+            "db.r6gd.xlarge": 1.676,
+            "db.r6i.8xlarge": 12.48,
+            "db.r7g.xlarge": 1.14321,
+            "db.r6g.4xlarge": 5.587,
+            "db.r6gd.4xlarge": 6.702,
+            "db.r6g.xlarge": 1.396,
+            "db.t3.medium": 0.218,
+            "db.r8g.48xlarge": 54.79776,
+            "db.t3.large": 0.437,
+            "db.r5.24xlarge": 37.44,
+            "db.r7g.8xlarge": 9.14091,
+            "db.t4g.medium": 0.199,
+            "db.r6g.8xlarge": 11.174,
+            "db.r6i.xlarge": 1.56,
+            "db.r6i.16xlarge": 24.96,
+            "db.r5.large": 0.78,
+            "db.r8g.4xlarge": 4.56648,
+            "db.r7g.4xlarge": 4.56966,
+            "db.r6gd.16xlarge": 26.807,
+            "db.r7i.8xlarge": 9.59088,
+            "db.r5.xlarge": 1.56,
+            "db.r7i.large": 0.59943,
+            "db.r8g.24xlarge": 27.39888,
+            "db.r8gd.16xlarge": 20.637,
+            "db.r8gd.24xlarge": 30.955,
+            "db.r8gd.xlarge": 1.29,
+            "db.r7i.24xlarge": 28.77264,
+            "db.r7i.4xlarge": 4.79544,
+            "db.t4g.large": 0.398,
+            "db.r8g.xlarge": 1.14162,
+            "db.r8gd.8xlarge": 10.319,
+            "db.r5.8xlarge": 12.48,
+            "db.r6i.24xlarge": 37.44,
+            "db.r6g.large": 0.698
+          },
+          "backup_gb_mes": 0.037,
+          "acu_hora": 0.25,
+          "storage_gb_mes_io_opt": 0.428,
+          "io_request": 2.8e-07,
+          "storage_gb_mes": 0.19,
+          "acu_hora_io_opt": 0.33
+        },
+        "us-east-1": {
+          "instancias": {
+            "db.r6g.large": 0.26,
+            "db.r5.24xlarge": 13.92,
+            "db.r8gd.16xlarge": 9.984,
+            "db.r8a.4xlarge": 2.8016,
+            "db.r4.large": 0.29,
+            "db.r5.16xlarge": 9.28,
+            "db.r8gd.4xlarge": 2.496,
+            "db.x2g.2xlarge": 1.508,
+            "db.r8g.xlarge": 0.552,
+            "db.r4.2xlarge": 1.16,
+            "db.r7i.large": 0.29,
+            "db.r7i.8xlarge": 4.64,
+            "db.r8g.16xlarge": 8.832,
+            "db.r8a.48xlarge": 33.6192,
+            "db.r6i.24xlarge": 13.92,
+            "db.r8g.24xlarge": 13.248,
+            "db.r6i.xlarge": 0.58,
+            "db.r6gd.xlarge": 0.624,
+            "db.r6g.16xlarge": 8.306,
+            "db.r6g.8xlarge": 4.153,
+            "db.r5.xlarge": 0.58,
+            "db.t4g.large": 0.146,
+            "db.r8g.large": 0.276,
+            "db.r7i.24xlarge": 13.92,
+            "db.r8a.16xlarge": 11.2064,
+            "db.r6gd.16xlarge": 9.984,
+            "db.r6gd.4xlarge": 2.496,
+            "db.r5.large": 0.29,
+            "db.r7g.8xlarge": 4.422,
+            "db.r7i.48xlarge": 27.84,
+            "db.r8g.48xlarge": 26.496,
+            "db.r7i.16xlarge": 9.28,
+            "db.r8a.8xlarge": 5.6032,
+            "db.r6i.large": 0.29,
+            "db.r7i.xlarge": 0.58,
+            "db.r5.4xlarge": 2.32,
+            "db.r6i.4xlarge": 2.32,
+            "db.r7i.4xlarge": 2.32,
+            "db.r4.16xlarge": 9.28,
+            "db.r7g.16xlarge": 8.844,
+            "db.r8g.8xlarge": 4.416,
+            "db.r6i.16xlarge": 9.28,
+            "db.r6gd.8xlarge": 4.992,
+            "db.r8a.24xlarge": 16.8096,
+            "db.r8gd.24xlarge": 14.976,
+            "db.x2g.12xlarge": 9.048,
+            "db.t3.medium": 0.082,
+            "db.r7g.xlarge": 0.553,
+            "db.r8gd.48xlarge": 29.952,
+            "db.r8gd.xlarge": 0.624,
+            "db.t3.large": 0.164,
+            "db.t4g.medium": 0.073,
+            "db.r8a.xlarge": 0.7004,
+            "db.r5.8xlarge": 4.64,
+            "db.r6i.8xlarge": 4.64,
+            "db.r6g.xlarge": 0.519,
+            "db.x2g.large": 0.377,
+            "db.r7g.large": 0.276,
+            "db.r7g.4xlarge": 2.211,
+            "db.r8g.4xlarge": 2.208,
+            "db.r6id.24xlarge": 16.704,
+            "db.r6g.4xlarge": 2.076,
+            "db.r8a.large": 0.3502,
+            "db.r8gd.8xlarge": 4.992
+          },
+          "instancias_io_opt": {
+            "db.r7i.large": 0.377,
+            "db.r8g.large": 0.359,
+            "db.r5.4xlarge": 3.016,
+            "db.r6i.large": 0.377,
+            "db.r8a.large": 0.4553,
+            "db.r8a.4xlarge": 3.6424,
+            "db.r8gd.xlarge": 0.8112,
+            "db.r7i.4xlarge": 3.016,
+            "db.r8a.24xlarge": 21.8544,
+            "db.r7i.xlarge": 0.754,
+            "db.r8a.48xlarge": 43.7088,
+            "db.r8g.xlarge": 0.718,
+            "db.r8g.4xlarge": 2.872,
+            "db.r7g.xlarge": 0.719,
+            "db.r6gd.8xlarge": 6.49,
+            "db.r6g.large": 0.338,
+            "db.r6g.8xlarge": 5.399,
+            "db.t4g.large": 0.19,
+            "db.r7g.4xlarge": 2.874,
+            "db.r6i.4xlarge": 3.016,
+            "db.r8g.24xlarge": 17.232,
+            "db.r6g.16xlarge": 10.798,
+            "db.x2g.12xlarge": 11.762,
+            "db.r5.large": 0.377,
+            "db.r5.xlarge": 0.754,
+            "db.r5.16xlarge": 12.064,
+            "db.r7g.16xlarge": 11.497,
+            "db.r8gd.16xlarge": 12.9792,
+            "db.r8g.16xlarge": 11.488,
+            "db.x2g.large": 0.49,
+            "db.r6id.24xlarge": 21.715,
+            "db.t3.medium": 0.107,
+            "db.r8g.48xlarge": 34.464,
+            "db.r7i.8xlarge": 6.032,
+            "db.r7g.large": 0.359,
+            "db.r8gd.24xlarge": 19.4688,
+            "db.r8g.8xlarge": 5.744,
+            "db.r6gd.xlarge": 0.811,
+            "db.r7g.8xlarge": 5.749,
+            "db.r5.24xlarge": 18.096,
+            "db.r6i.16xlarge": 12.064,
+            "db.r6i.8xlarge": 6.032,
+            "db.r8a.xlarge": 0.9106,
+            "db.r6gd.4xlarge": 3.245,
+            "db.t3.large": 0.213,
+            "db.r8gd.48xlarge": 38.9376,
+            "db.r8gd.4xlarge": 3.2448,
+            "db.r6i.24xlarge": 18.096,
+            "db.r6i.xlarge": 0.754,
+            "db.r8a.8xlarge": 7.2848,
+            "db.r6g.xlarge": 0.675,
+            "db.r8a.16xlarge": 14.5696,
+            "db.r6gd.16xlarge": 12.979,
+            "db.r7i.16xlarge": 12.064,
+            "db.r6g.4xlarge": 2.699,
+            "db.r7i.24xlarge": 18.096,
+            "db.t4g.medium": 0.095,
+            "db.r7i.48xlarge": 36.192,
+            "db.x2g.2xlarge": 1.96,
+            "db.r8gd.8xlarge": 6.4896,
+            "db.r5.8xlarge": 6.032
+          },
+          "backup_gb_mes": 0.021,
+          "storage_gb_mes": 0.1,
+          "acu_hora_io_opt": 0.16,
+          "io_request": 2e-07,
+          "storage_gb_mes_io_opt": 0.225,
+          "acu_hora": 0.12
+        }
+      }
+    },
+    "kafka-sink": {
+      "habilitado": true,
+      "entradas": {
         "herdar_regiao_do_alb": true,
         "region": "sa-east-1",
-        "horas_por_dia": 24.0,
-        "dias_por_mes": 30.0,
-        "tempo_cpu_por_evento_ms": 6.0,
-        "tempo_cpu_adicional_ms": 8.0,
-        "latencia_consentimento_ms": 50.0,
-        "latencia_resource_ms": 20.0,
-        "latencia_escrita_ms": 10.0,
-        "concorrencia_por_task": 100.0,
-        "utilizacao_alvo_cpu": 60.0,
-        "particoes_topico": 256.0,
-        "consumidores_por_task": 2.0,
+        "eventos_por_minuto": 60000,
+        "bytes_por_evento": 320,
+        "fator_compressao": 4.0,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "modo": "msk_connect",
+        "mcus": 1,
+        "workers": 2,
+        "intervalo_flush_segundos": 60,
+        "particoes_topico": 32
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonMSK)",
+        "sa-east-1": {
+          "mcu_hora": 0.175,
+          "data_channel_gb": 0.01
+        },
+        "us-east-1": {
+          "data_channel_gb": 0.008,
+          "mcu_hora": 0.11
+        }
+      }
+    },
+    "s3-staging": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_do_sink": true,
+        "region": "sa-east-1",
+        "gb_gravados_mes": 200,
+        "arquivos_mes": 1382400,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "retencao_dias": 7,
+        "leituras_por_arquivo": 1.0,
+        "requests_listagem_por_execucao": 10,
+        "execucoes_glue_mes": 8640,
+        "herdar_do_glue": true
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonS3)",
+        "sa-east-1": {
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 51200.0,
+              "preco": 0.0405,
+              "unidade": "GB-Mo",
+              "descricao": "$0.0405 per GB - first 50 TB / month of storage used"
+            },
+            {
+              "inicio": 51200.0,
+              "fim": 512000.0,
+              "preco": 0.039,
+              "unidade": "GB-Mo",
+              "descricao": "$0.039 per GB - next 450 TB / month of storage used"
+            },
+            {
+              "inicio": 512000.0,
+              "fim": null,
+              "preco": 0.037,
+              "unidade": "GB-Mo",
+              "descricao": "$0.037 per GB - storage used / month over 500 TB"
+            }
+          ],
+          "get_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 5.6e-07,
+              "unidade": "Requests",
+              "descricao": "$0.0056 per 10,000 GET and all other requests"
+            }
+          ],
+          "put_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 7e-06,
+              "unidade": "Requests",
+              "descricao": "$0.007 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          ]
+        },
+        "us-east-1": {
+          "get_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 4e-07,
+              "unidade": "Requests",
+              "descricao": "$0.004 per 10,000 GET and all other requests"
+            }
+          ],
+          "put_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 5e-06,
+              "unidade": "Requests",
+              "descricao": "$0.005 per 1,000 PUT Requests/COPY/POST or LIST Requests to S3 Table Buckets in US East (N. Virginia)"
+            }
+          ],
+          "storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 51200.0,
+              "preco": 0.023,
+              "unidade": "GB-Mo",
+              "descricao": "$0.023 per GB - first 50 TB / month of storage used"
+            },
+            {
+              "inicio": 51200.0,
+              "fim": 512000.0,
+              "preco": 0.022,
+              "unidade": "GB-Mo",
+              "descricao": "$0.022 per GB - next 450 TB / month of storage used"
+            },
+            {
+              "inicio": 512000.0,
+              "fim": null,
+              "preco": 0.021,
+              "unidade": "GB-Mo",
+              "descricao": "$0.021 per GB - storage used / month over 500 TB"
+            }
+          ]
+        }
+      }
+    },
+    "glue-carga": {
+      "habilitado": true,
+      "entradas": {
+        "modo": "agendado",
+        "versao": "gen2",
+        "intervalo_minutos": 5,
+        "duracao_execucao_min": 2.0,
+        "dpus": 2,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "region": "sa-east-1",
+        "herdar_do_sink": true,
+        "eventos_mes": 2592000000,
+        "eventos_por_dpu_por_segundo": 2000
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AWSGlue)",
+        "sa-east-1": {
+          "gen2": 0.483,
+          "gen1": 0.69,
+          "flex_gen1": 0.45,
+          "flex_gen2": 0.315
+        },
+        "us-east-1": {
+          "flex_gen1": 0.29,
+          "gen2": 0.308,
+          "gen1": 0.44,
+          "flex_gen2": 0.203
+        }
+      }
+    },
+    "ecs-consentimentos": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_regiao_do_alb": true,
+        "region": "sa-east-1",
+        "eventos_por_minuto": 2000,
+        "escritas_por_evento": 1.0,
+        "fator_pico": 1.0,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "tempo_cpu_por_evento_ms": 5.0,
+        "latencia_escrita_ms": 8,
+        "concorrencia_por_task": 50,
+        "utilizacao_alvo_cpu": 60,
+        "particoes_topico": 12,
+        "consumidores_por_task": 2,
         "arquitetura": "x86",
-        "vcpu_por_task": 2.0,
-        "memoria_gb_por_task": 4.0,
-        "armazenamento_efemero_gb": 20.0,
-        "tasks_minimas": 2.0,
-        "tasks_maximas": 500.0,
-        "horas_pico_por_dia": 24.0,
-        "percentual_eventos_fora_pico": 40.0
+        "vcpu_por_task": 1.0,
+        "memoria_gb_por_task": 2.0,
+        "armazenamento_efemero_gb": 20,
+        "tasks_minimas": 2,
+        "tasks_maximas": 100
       },
       "precos_fallback": {
         "moeda": "USD",
@@ -276,8 +713,344 @@
         }
       }
     },
-    "dynamodb-saldo": {
+    "ecs-resources": {
       "habilitado": true,
+      "entradas": {
+        "herdar_regiao_do_alb": true,
+        "region": "sa-east-1",
+        "eventos_por_minuto": 2000,
+        "escritas_por_evento": 1.0,
+        "fator_pico": 1.0,
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "tempo_cpu_por_evento_ms": 5.0,
+        "latencia_escrita_ms": 8,
+        "concorrencia_por_task": 50,
+        "utilizacao_alvo_cpu": 60,
+        "particoes_topico": 12,
+        "consumidores_por_task": 2,
+        "arquitetura": "x86",
+        "vcpu_por_task": 1.0,
+        "memoria_gb_por_task": 2.0,
+        "armazenamento_efemero_gb": 20,
+        "tasks_minimas": 2,
+        "tasks_maximas": 100
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonECS) - snapshot 2026-10-19",
+        "sa-east-1": {
+          "vcpu_hora_x86": 0.0696,
+          "gb_hora_x86": 0.0076,
+          "vcpu_hora_arm": 0.0557,
+          "gb_hora_arm": 0.00612,
+          "storage_efemero_gb_hora": 0.000211
+        },
+        "us-east-1": {
+          "vcpu_hora_x86": 0.04048,
+          "gb_hora_x86": 0.004445,
+          "vcpu_hora_arm": 0.03238,
+          "gb_hora_arm": 0.00356,
+          "storage_efemero_gb_hora": 0.000111
+        }
+      }
+    },
+    "cloudwatch": {
+      "habilitado": true,
+      "entradas": {
+        "herdar_regiao_do_alb": true,
+        "region": "sa-east-1",
+        "horas_por_dia": 24,
+        "dias_por_mes": 30,
+        "numero_servicos": 2,
+        "politicas_escala_por_servico": 1,
+        "alarmes_por_politica": 2,
+        "metricas_padrao_observadas": 6,
+        "metricas_customizadas": 2,
+        "modo_coleta_externa": "getmetricdata",
+        "metricas_coletadas": 40,
+        "intervalo_coleta_minutos": 10,
+        "metricas_no_stream": 40,
+        "atualizacoes_por_metrica_por_minuto": 1.0,
+        "alarmes_operacionais": 8,
+        "alarmes_alta_resolucao": 0,
+        "alarmes_compostos": 1,
+        "logs_no_cloudwatch": false,
+        "classe_logs": "standard",
+        "gb_logs_por_mes": 0,
+        "retencao_dias": 30,
+        "fator_compressao_logs": 10.0,
+        "gb_escaneados_insights_mes": 0
+      },
+      "precos_fallback": {
+        "moeda": "USD",
+        "fonte": "AWS Price List Query API (AmazonCloudWatch) - snapshot 2026-11-04",
+        "sa-east-1": {
+          "alarme_alta_resolucao_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.405,
+              "unidade": "Alarms",
+              "descricao": "$0.405 per alarm metric month (high resolution) - South America (Sao Paulo)"
+            }
+          ],
+          "alarme_composto_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.675,
+              "unidade": "Alarms",
+              "descricao": "$0.675 per composite alarm month - South America (Sao Paulo)"
+            }
+          ],
+          "alarme_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.135,
+              "unidade": "Alarms",
+              "descricao": "$0.135 per alarm metric month (standard resolution) - South America (Sao Paulo)"
+            }
+          ],
+          "api_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.4e-05,
+              "unidade": "Requests",
+              "descricao": "$0.014 per 1,000 requests"
+            }
+          ],
+          "getmetricdata_metrica": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1.4e-05,
+              "unidade": "Metrics",
+              "descricao": "$0.014 per 1,000 metrics requested using GetMetricData API - South America (Sao Paulo)"
+            }
+          ],
+          "insights_scan_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.009,
+              "unidade": "GB",
+              "descricao": "$0.009 per GB log data scanned by CloudWatch Logs Insights queries - South America (Sao Paulo)"
+            }
+          ],
+          "log_ingestao_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.9,
+              "unidade": "GB",
+              "descricao": "$0.90 per GB custom log data ingested in Standard log class - South America (Sao Paulo)"
+            }
+          ],
+          "log_ingestao_ia_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.45,
+              "unidade": "GB",
+              "descricao": "$0.45 per GB custom log data ingested in Infrequent Access log class - South America (Sao Paulo)"
+            }
+          ],
+          "log_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.0408,
+              "unidade": "GB-Mo",
+              "descricao": "$0.0408 per GB-mo of log storage - South America (Sao Paulo)"
+            }
+          ],
+          "log_storage_ia_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.02448,
+              "unidade": "GB-Mo",
+              "descricao": "$0.02448 per GB-Mo for TimedStorage-IA-ByteHrs in South America (Sao Paulo)"
+            }
+          ],
+          "metric_stream_update": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 4.2e-06,
+              "unidade": "Metric Update",
+              "descricao": "$0.0042 per 1,000 metric updates - South America (Sao Paulo)"
+            }
+          ],
+          "metrica_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 10000.0,
+              "preco": 0.3,
+              "unidade": "Metrics",
+              "descricao": "$0.30 per metric-month for the first 10,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 10000.0,
+              "fim": 250000.0,
+              "preco": 0.1,
+              "unidade": "Metrics",
+              "descricao": "$0.10 per metric-month for the next 240,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 250000.0,
+              "fim": 1000000.0,
+              "preco": 0.05,
+              "unidade": "Metrics",
+              "descricao": "$0.05 per metric-month for the next 750,000 metrics - South America (Sao Paulo)"
+            },
+            {
+              "inicio": 1000000.0,
+              "fim": null,
+              "preco": 0.02,
+              "unidade": "Metrics",
+              "descricao": "$0.02 per metric-month for over 1,000,000 metrics - South America (Sao Paulo)"
+            }
+          ]
+        },
+        "us-east-1": {
+          "alarme_alta_resolucao_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.3,
+              "unidade": "Alarms",
+              "descricao": "$0.30 per alarm metric month (high resolution) - US East (Northern Virginia)"
+            }
+          ],
+          "alarme_composto_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.5,
+              "unidade": "Alarms",
+              "descricao": "$0.50 per composite alarm month - US East (Northern Virginia)"
+            }
+          ],
+          "alarme_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.1,
+              "unidade": "Alarms",
+              "descricao": "$0.10 per alarm metric month (standard resolution) - US East (Northern Virginia)"
+            }
+          ],
+          "api_request": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1e-05,
+              "unidade": "Requests",
+              "descricao": "$0.01 per 1,000 requests"
+            }
+          ],
+          "getmetricdata_metrica": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 1e-05,
+              "unidade": "Metrics",
+              "descricao": "$0.01 per 1,000 metrics requested using GetMetricData API - US East (Northern Virginia)"
+            }
+          ],
+          "insights_scan_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.005,
+              "unidade": "GB",
+              "descricao": "$0.005 per GB log data scanned by CloudWatch Logs Insights queries - US East (Northern Virginia)"
+            }
+          ],
+          "log_ingestao_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.5,
+              "unidade": "GB",
+              "descricao": "$0.50 per GB custom log data ingested in Standard log class - US East (Northern Virginia)"
+            }
+          ],
+          "log_ingestao_ia_gb": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.25,
+              "unidade": "GB",
+              "descricao": "$0.25 per GB custom log data ingested in Infrequent Access log class -US East (Northern Virginia)"
+            }
+          ],
+          "log_storage_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.03,
+              "unidade": "GB-Mo",
+              "descricao": "$0.03 per GB-mo of log storage - US East (Northern Virginia)"
+            }
+          ],
+          "log_storage_ia_gb_mes": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 0.018,
+              "unidade": "GB-Mo",
+              "descricao": "$0.018 per GB-Mo for TimedStorage-IA-ByteHrs in US East (N. Virginia)"
+            }
+          ],
+          "metric_stream_update": [
+            {
+              "inicio": 0.0,
+              "fim": null,
+              "preco": 3e-06,
+              "unidade": "Metric Update",
+              "descricao": "$0.003 per 1,000 metric updates - US East (N. Virginia)"
+            }
+          ],
+          "metrica_mes": [
+            {
+              "inicio": 0.0,
+              "fim": 10000.0,
+              "preco": 0.3,
+              "unidade": "Metrics",
+              "descricao": "$0.30 per metric-month for the first 10,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 10000.0,
+              "fim": 250000.0,
+              "preco": 0.1,
+              "unidade": "Metrics",
+              "descricao": "$0.10 per metric-month for the next 240,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 250000.0,
+              "fim": 1000000.0,
+              "preco": 0.05,
+              "unidade": "Metrics",
+              "descricao": "$0.05 per metric-month for the next 750,000 metrics - US East (Northern Virginia)"
+            },
+            {
+              "inicio": 1000000.0,
+              "fim": null,
+              "preco": 0.02,
+              "unidade": "Metrics",
+              "descricao": "$0.02 per metric-month  for over 1,000,000 metrics - US East (Northern Virginia)"
+            }
+          ]
+        }
+      }
+    },
+    "dynamodb-saldo": {
+      "habilitado": false,
       "entradas": {
         "herdar_volumetria_do_alb": true,
         "region": "sa-east-1",
@@ -588,7 +1361,7 @@
       }
     },
     "dynamodb-paginacao": {
-      "habilitado": true,
+      "habilitado": false,
       "entradas": {
         "herdar_volumetria_do_alb": true,
         "region": "sa-east-1",
@@ -885,297 +1658,53 @@
         }
       }
     },
-    "cloudwatch": {
-      "habilitado": true,
+    "ecs-carga": {
+      "habilitado": false,
       "entradas": {
+        "modo_volumetria": "eventos_por_minuto",
+        "eventos_por_minuto": 50000.0,
+        "numero_clientes": 70000000.0,
+        "alteracoes_por_cliente_por_dia": 5.0,
+        "percentual_eventos_com_consentimento": 32.0,
+        "fator_pico": 1.0,
         "herdar_regiao_do_alb": true,
         "region": "sa-east-1",
-        "horas_por_dia": 24,
-        "dias_por_mes": 30,
-        "numero_servicos": 2,
-        "politicas_escala_por_servico": 1,
-        "alarmes_por_politica": 2,
-        "metricas_padrao_observadas": 6,
-        "metricas_customizadas": 2,
-        "modo_coleta_externa": "getmetricdata",
-        "metricas_coletadas": 40,
-        "intervalo_coleta_minutos": 10,
-        "metricas_no_stream": 40,
-        "atualizacoes_por_metrica_por_minuto": 1.0,
-        "alarmes_operacionais": 8,
-        "alarmes_alta_resolucao": 0,
-        "alarmes_compostos": 1,
-        "logs_no_cloudwatch": false,
-        "classe_logs": "standard",
-        "gb_logs_por_mes": 0,
-        "retencao_dias": 30,
-        "fator_compressao_logs": 10.0,
-        "gb_escaneados_insights_mes": 0
+        "horas_por_dia": 24.0,
+        "dias_por_mes": 30.0,
+        "tempo_cpu_por_evento_ms": 6.0,
+        "tempo_cpu_adicional_ms": 8.0,
+        "latencia_consentimento_ms": 50.0,
+        "latencia_resource_ms": 20.0,
+        "latencia_escrita_ms": 10.0,
+        "concorrencia_por_task": 100.0,
+        "utilizacao_alvo_cpu": 60.0,
+        "particoes_topico": 256.0,
+        "consumidores_por_task": 2.0,
+        "arquitetura": "x86",
+        "vcpu_por_task": 2.0,
+        "memoria_gb_por_task": 4.0,
+        "armazenamento_efemero_gb": 20.0,
+        "tasks_minimas": 2.0,
+        "tasks_maximas": 500.0,
+        "horas_pico_por_dia": 24.0,
+        "percentual_eventos_fora_pico": 40.0
       },
       "precos_fallback": {
         "moeda": "USD",
-        "fonte": "AWS Price List Query API (AmazonCloudWatch) - snapshot 2026-11-04",
+        "fonte": "AWS Price List Query API (AmazonECS) - snapshot 2026-10-19",
         "sa-east-1": {
-          "alarme_alta_resolucao_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.405,
-              "unidade": "Alarms",
-              "descricao": "$0.405 per alarm metric month (high resolution) - South America (Sao Paulo)"
-            }
-          ],
-          "alarme_composto_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.675,
-              "unidade": "Alarms",
-              "descricao": "$0.675 per composite alarm month - South America (Sao Paulo)"
-            }
-          ],
-          "alarme_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.135,
-              "unidade": "Alarms",
-              "descricao": "$0.135 per alarm metric month (standard resolution) - South America (Sao Paulo)"
-            }
-          ],
-          "api_request": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 1.4e-05,
-              "unidade": "Requests",
-              "descricao": "$0.014 per 1,000 requests"
-            }
-          ],
-          "getmetricdata_metrica": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 1.4e-05,
-              "unidade": "Metrics",
-              "descricao": "$0.014 per 1,000 metrics requested using GetMetricData API - South America (Sao Paulo)"
-            }
-          ],
-          "insights_scan_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.009,
-              "unidade": "GB",
-              "descricao": "$0.009 per GB log data scanned by CloudWatch Logs Insights queries - South America (Sao Paulo)"
-            }
-          ],
-          "log_ingestao_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.9,
-              "unidade": "GB",
-              "descricao": "$0.90 per GB custom log data ingested in Standard log class - South America (Sao Paulo)"
-            }
-          ],
-          "log_ingestao_ia_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.45,
-              "unidade": "GB",
-              "descricao": "$0.45 per GB custom log data ingested in Infrequent Access log class - South America (Sao Paulo)"
-            }
-          ],
-          "log_storage_gb_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.0408,
-              "unidade": "GB-Mo",
-              "descricao": "$0.0408 per GB-mo of log storage - South America (Sao Paulo)"
-            }
-          ],
-          "log_storage_ia_gb_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.02448,
-              "unidade": "GB-Mo",
-              "descricao": "$0.02448 per GB-Mo for TimedStorage-IA-ByteHrs in South America (Sao Paulo)"
-            }
-          ],
-          "metric_stream_update": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 4.2e-06,
-              "unidade": "Metric Update",
-              "descricao": "$0.0042 per 1,000 metric updates - South America (Sao Paulo)"
-            }
-          ],
-          "metrica_mes": [
-            {
-              "inicio": 0.0,
-              "fim": 10000.0,
-              "preco": 0.3,
-              "unidade": "Metrics",
-              "descricao": "$0.30 per metric-month for the first 10,000 metrics - South America (Sao Paulo)"
-            },
-            {
-              "inicio": 10000.0,
-              "fim": 250000.0,
-              "preco": 0.1,
-              "unidade": "Metrics",
-              "descricao": "$0.10 per metric-month for the next 240,000 metrics - South America (Sao Paulo)"
-            },
-            {
-              "inicio": 250000.0,
-              "fim": 1000000.0,
-              "preco": 0.05,
-              "unidade": "Metrics",
-              "descricao": "$0.05 per metric-month for the next 750,000 metrics - South America (Sao Paulo)"
-            },
-            {
-              "inicio": 1000000.0,
-              "fim": null,
-              "preco": 0.02,
-              "unidade": "Metrics",
-              "descricao": "$0.02 per metric-month for over 1,000,000 metrics - South America (Sao Paulo)"
-            }
-          ]
+          "vcpu_hora_x86": 0.0696,
+          "gb_hora_x86": 0.0076,
+          "vcpu_hora_arm": 0.0557,
+          "gb_hora_arm": 0.00612,
+          "storage_efemero_gb_hora": 0.000211
         },
         "us-east-1": {
-          "alarme_alta_resolucao_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.3,
-              "unidade": "Alarms",
-              "descricao": "$0.30 per alarm metric month (high resolution) - US East (Northern Virginia)"
-            }
-          ],
-          "alarme_composto_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.5,
-              "unidade": "Alarms",
-              "descricao": "$0.50 per composite alarm month - US East (Northern Virginia)"
-            }
-          ],
-          "alarme_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.1,
-              "unidade": "Alarms",
-              "descricao": "$0.10 per alarm metric month (standard resolution) - US East (Northern Virginia)"
-            }
-          ],
-          "api_request": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 1e-05,
-              "unidade": "Requests",
-              "descricao": "$0.01 per 1,000 requests"
-            }
-          ],
-          "getmetricdata_metrica": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 1e-05,
-              "unidade": "Metrics",
-              "descricao": "$0.01 per 1,000 metrics requested using GetMetricData API - US East (Northern Virginia)"
-            }
-          ],
-          "insights_scan_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.005,
-              "unidade": "GB",
-              "descricao": "$0.005 per GB log data scanned by CloudWatch Logs Insights queries - US East (Northern Virginia)"
-            }
-          ],
-          "log_ingestao_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.5,
-              "unidade": "GB",
-              "descricao": "$0.50 per GB custom log data ingested in Standard log class - US East (Northern Virginia)"
-            }
-          ],
-          "log_ingestao_ia_gb": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.25,
-              "unidade": "GB",
-              "descricao": "$0.25 per GB custom log data ingested in Infrequent Access log class -US East (Northern Virginia)"
-            }
-          ],
-          "log_storage_gb_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.03,
-              "unidade": "GB-Mo",
-              "descricao": "$0.03 per GB-mo of log storage - US East (Northern Virginia)"
-            }
-          ],
-          "log_storage_ia_gb_mes": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 0.018,
-              "unidade": "GB-Mo",
-              "descricao": "$0.018 per GB-Mo for TimedStorage-IA-ByteHrs in US East (N. Virginia)"
-            }
-          ],
-          "metric_stream_update": [
-            {
-              "inicio": 0.0,
-              "fim": null,
-              "preco": 3e-06,
-              "unidade": "Metric Update",
-              "descricao": "$0.003 per 1,000 metric updates - US East (N. Virginia)"
-            }
-          ],
-          "metrica_mes": [
-            {
-              "inicio": 0.0,
-              "fim": 10000.0,
-              "preco": 0.3,
-              "unidade": "Metrics",
-              "descricao": "$0.30 per metric-month for the first 10,000 metrics - US East (Northern Virginia)"
-            },
-            {
-              "inicio": 10000.0,
-              "fim": 250000.0,
-              "preco": 0.1,
-              "unidade": "Metrics",
-              "descricao": "$0.10 per metric-month for the next 240,000 metrics - US East (Northern Virginia)"
-            },
-            {
-              "inicio": 250000.0,
-              "fim": 1000000.0,
-              "preco": 0.05,
-              "unidade": "Metrics",
-              "descricao": "$0.05 per metric-month for the next 750,000 metrics - US East (Northern Virginia)"
-            },
-            {
-              "inicio": 1000000.0,
-              "fim": null,
-              "preco": 0.02,
-              "unidade": "Metrics",
-              "descricao": "$0.02 per metric-month  for over 1,000,000 metrics - US East (Northern Virginia)"
-            }
-          ]
+          "vcpu_hora_x86": 0.04048,
+          "gb_hora_x86": 0.004445,
+          "vcpu_hora_arm": 0.03238,
+          "gb_hora_arm": 0.00356,
+          "storage_efemero_gb_hora": 0.000111
         }
       }
     }
